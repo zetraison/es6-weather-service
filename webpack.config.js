@@ -32,7 +32,8 @@ module.exports = {
     plugins: [
         new webpack.NoErrorsPlugin(),
         new webpack.ProvidePlugin({
-            $: 'jquery'
+            $: 'jquery',
+            jQuery: 'jquery'
         }),
         new webpack.DefinePlugin({
             NODE_ENV:   JSON.stringify(NODE_ENV),
@@ -41,6 +42,7 @@ module.exports = {
         new CopyWebpackPlugin([
             { from: './index.html', to: 'index.html' },
             { from: './resources/images', to: 'images' },
+            { from: './resources/favicon.ico', to: './' },
             { from: './style', to: 'css' }
         ])
     ],

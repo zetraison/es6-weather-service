@@ -33,16 +33,14 @@ class WeatherService extends Service {
         this.units = props && props.units
             ? props.units
             : WEATHER_UNITS['CELSIUS'];
-            
-        cnt: this.cnt = props && props.cnt ? props.cnt : 10;
     }
     
-    byCityName(name, type, callback) {
+    byCityName(name, type, limit, callback) {
         
         this.request(this.url + type, {
             data: {
                 q: name,
-                cnt: this.cnt,
+                cnt: limit || 10,
                 mode: this.mode,
                 units: this.units,
                 appid: this.appid
@@ -51,12 +49,12 @@ class WeatherService extends Service {
         });
     }
     
-    byCityId(id, type, callback) {
+    byCityId(id, type, limit, callback) {
         
         this.request(this.url + type, {
             data: {
                 id: id,
-                cnt: this.cnt,
+                cnt: limit || 10,
                 mode: this.mode,
                 units: this.units,
                 appid: this.appid
@@ -65,13 +63,13 @@ class WeatherService extends Service {
         });
     }
     
-    byGeoCoord(lat, lon, type, callback) {
+    byGeoCoord(lat, lon, type, limit, callback) {
         
         this.request(this.url + type, {
             data: {
                 lat: lat,
                 lon: lon,
-                cnt: this.cnt,
+                cnt: limit || 10,
                 mode: this.mode,
                 units: this.units,
                 appid: this.appid

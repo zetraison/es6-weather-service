@@ -23,7 +23,7 @@ class CurrentWeatherChart extends React.Component {
         
         let cityName = this.props.querySearch ? this.props.querySearch : config.defaultCity;
         
-        weatherService.byCityName(cityName, WEATHER_TYPES['CURRENT'], response => {
+        weatherService.byCityName(cityName, WEATHER_TYPES['CURRENT'], null, response => {
             this.setState({
                 cityName: response.name,
                 main: response.main,

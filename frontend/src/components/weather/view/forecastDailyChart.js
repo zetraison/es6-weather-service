@@ -21,8 +21,9 @@ class ForecastChart extends React.Component {
     refreshData(callback){
         
         let cityName = this.props.querySearch ? this.props.querySearch : config.defaultCity;
+        let limit = 8;
         
-        weatherService.byCityName(cityName, WEATHER_TYPES['FORECAST_DAILY'], response => {
+        weatherService.byCityName(cityName, WEATHER_TYPES['FORECAST_DAILY'], limit, response => {
             this.setState({ 
                 city: response.city,
                 list: response.list,

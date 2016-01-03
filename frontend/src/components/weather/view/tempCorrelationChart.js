@@ -6,7 +6,7 @@ import WeatherService       from 'components/weather/service';
 import config               from 'config';
 import {timestampToTime, timestampToDate} from 'util/util';
 
-let weatherService = new WeatherService({ cnt: 8 });
+let weatherService = new WeatherService();
 
 class ForecastChart extends React.Component {
     
@@ -21,8 +21,9 @@ class ForecastChart extends React.Component {
     refreshData(callback){
         
         let cityName = this.props.querySearch ? this.props.querySearch : config.defaultCity;
+        let limit = 8;
         
-        weatherService.byCityName(cityName, WEATHER_TYPES['FORECAST'], response => {
+        weatherService.byCityName(cityName, WEATHER_TYPES['FORECAST'], limit, response => {
             this.setState({ 
                 city: response.city,
                 list: response.list,

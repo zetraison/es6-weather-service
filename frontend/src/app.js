@@ -2,9 +2,11 @@ import React                                from 'react';
 import ReactDOM                             from 'react/lib/ReactDOM';
 import { Router, Route, Link, Redirect }    from 'react-router';
 import createBrowserHistory                 from 'history/lib/createBrowserHistory';
-import WeatherView1                         from 'pages/weatherView1';
-import WeatherView2                         from 'pages/weatherView2';
+import WeatherView                          from 'pages/weatherView';
+import DetailWeatherView                    from 'pages/DetailWeatherView';
 import {appendBody}                         from 'util/util';
+import jQuery                               from 'jquery';
+//require('bootstrap/js/transition')($);
 
 const history = createBrowserHistory();
 
@@ -57,8 +59,8 @@ class Navigation extends React.Component {
                     </div>
                     <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul className="nav navbar-nav">
-                            <li onClick={this.onClick.bind(this)}><Link to='weather1'>Свод</Link></li>
-                            <li onClick={this.onClick.bind(this)}><Link to='weather2'>Детали</Link></li>
+                            <li onClick={this.onClick.bind(this)}><Link to='main'>Главная</Link></li>
+                            <li onClick={this.onClick.bind(this)}><Link to='detail'>Подробно</Link></li>
                         </ul>
                         
                         <Search querySearch={this.querySearch} />
@@ -98,10 +100,10 @@ class NoMatch extends React.Component {
 ReactDOM.render((
     <Router history={history}>
         <Route component={App}>
-            <Route path="weather1" component={WeatherView1}/>
-            <Route path="weather2" component={WeatherView2}/>
+            <Route path="main" component={WeatherView}/>
+            <Route path="detail" component={DetailWeatherView}/>
             
-            <Redirect from="/" to="weather1" />
+            <Redirect from="/" to="main" />
             
             <Route path="/*" component={NoMatch} />
         </Route>
