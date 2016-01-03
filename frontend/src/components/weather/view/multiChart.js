@@ -35,7 +35,7 @@ class Pagination extends React.Component {
     refreshData(){
         
         let cityName = this.props.querySearch ? this.props.querySearch : config.defaultCity;
-        let limit = FORECAST_DAYS_LIMIT;
+        let limit = FORECAST_DAYS_LIMIT + 1;
         
         weatherService.byCityName(cityName, WEATHER_TYPES['FORECAST_DAILY'], limit, response => {
             this.setState({
@@ -50,7 +50,15 @@ class Pagination extends React.Component {
     
     render(){
         
-        let list = this.state.list.slice(0, FORECAST_DAYS_LIMIT);
+        let c = new Date().getDate();
+        
+        let list = this.state.list.filter(el => {
+            
+            let d = new Date(el.dt * 1000).getDate();
+            
+            return d >= c;
+            
+        }).slice(0, FORECAST_DAYS_LIMIT);
         
         list[0] ? list[0].isFirst = true : null;
         
@@ -108,14 +116,15 @@ class ForecastChart extends React.Component {
         
         let c = new Date().getDate();
         let t = new Date(dt * 1000).getDate();
-        t = !t || t == c ? c + 1 : t;
         
         let list = this.state.list.filter(el => {
             
             let d = new Date(el.dt * 1000).getDate();
             
-            return d <= t;
-        }).slice(-8);
+            return d <= (!t || t == c ? c + 1 : t);
+        });
+        
+        list = !t || t == c ? list.slice(0, TIME_INTERVAL_LIMIT) : list.slice(-TIME_INTERVAL_LIMIT);
         
         let units = {
             'temp': {
@@ -159,7 +168,7 @@ class ForecastChart extends React.Component {
                 text: 'Почасовой прогноз погоды, ' + cityName
             },
             subtitle: {
-                text: 'Source: Openweathermap.org'
+                text: 'Источник: Openweathermap.org'
             },
             xAxis: [{
                 categories: categories,

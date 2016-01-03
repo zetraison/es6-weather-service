@@ -41,7 +41,7 @@ class ForecastChart extends React.Component {
                 text: 'Прогноз погоды почасовой в ' + this.state.city.name
             },
             subtitle: {
-                text: 'Source: Openweathermap.org'
+                text: 'Источник: Openweathermap.org'
             },
             xAxis: [{
                 categories: this.state.list.map(el => timestampToTime(el.dt) + '<br>' + timestampToDate(el.dt)),
