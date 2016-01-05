@@ -15,27 +15,25 @@ body {
     margin-bottom: 5px;
 }
 
-.weather-icon {
-    width: 60px;
+.nav-tabs > li, .nav-pills > li {
+    float:none;
+    display:inline-block;
 }
 
-.pagination {
-    margin: 0 0;
+.nav-tabs, .nav-pills {
+    text-align:center;
 }
 
-.pagination li {
+.nav.nav-pills li p {
+    margin: 0 0 2px;
     font-size: 0.8em;
     text-align: center;
 }
 
-.daily-weather {
-    text-align: center;
+.weather-icon {
+    width: 60px;
 }
 
 .min-temp {
     color: #888888;
-}
-
-nav li p {
-    margin: 0 0 2px;
 }

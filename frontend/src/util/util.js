@@ -1,3 +1,5 @@
+import config from 'config';
+
 /**
  * Converting timestamp to date
  * 
@@ -37,6 +39,14 @@ export function getCurrentPosition(){
             resolve([Math.floor(res.coords.latitude), Math.floor(res.coords.longitude)]);
         });
     });
+}
+
+export function buildIconUrl(code){
+    return config.openWeatherMap.imgUrl + code + '.png';
+}
+
+export function convertingHpaTommHg(pressure){
+    return Math.round(config.hpaTommHgCoeff * pressure);
 }
 
 export function appendBody(){

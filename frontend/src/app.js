@@ -1,74 +1,67 @@
-import React                                from 'react';
-import ReactDOM                             from 'react/lib/ReactDOM';
-import { Router, Route, Link, Redirect }    from 'react-router';
-import createBrowserHistory                 from 'history/lib/createBrowserHistory';
-import WeatherView                          from 'pages/weatherView';
-import DetailWeatherView                    from 'pages/DetailWeatherView';
-import {appendBody}                         from 'util/util';
-import jQuery                               from 'jquery';
-//require('bootstrap/js/transition')($);
+import React                        from 'react/lib/React';
+import ReactDOM                     from 'react/lib/ReactDOM';
+import Router                       from 'react-router/lib/Router';
+import Route                        from 'react-router/lib/Route';
+import Redirect                     from 'react-router/lib/Redirect';
+import { Navigation }               from 'react-router';
+import Nav                          from 'react-bootstrap/lib/Nav';
+import NavItem                      from 'react-bootstrap/lib/NavItem';
+import Navbar                       from 'react-bootstrap/lib/Navbar';
+import Input                        from 'react-bootstrap/lib/Input';
+import Button                       from 'react-bootstrap/lib/Button';
+import createBrowserHistory         from 'history/lib/createBrowserHistory';
+import WeatherView                  from 'pages/weatherView';
+import DetailWeatherView            from 'pages/detailWeatherView';
+import {appendBody}                 from 'util/util';
 
 const history = createBrowserHistory();
 
-class Search extends React.Component {
+class NavigationView extends React.Component {
     
-    constructor(props) {
+    constructor(props){
         super(props);
         this.state = {
-            querySearch: props.querySearch
+            key: 0
         };
     }
     
-    onKeyPress(e) {
+    onSearchInputKeyPress(e) {
         if (e.charCode != 13)
             return;
         
         window.location = '?q=' + e.target.value;
     }
     
-    render() {
-        return (
-            <input type="text" className="form-control navbar-form navbar-right" placeholder="Поиск" defaultValue={this.state.querySearch} onKeyPress={this.onKeyPress.bind(this)} />
-        );
-    }
-}
-
-class Navigation extends React.Component {
-    
-    constructor(props) {
-        super(props);
-        this.querySearch = props.querySearch;
+    onSearchButClick(e) {
+        window.location = '?q=' + $('input.form-control')[0].value;
     }
     
-    onClick(e) {
-        $(e.target).parent().addClass('active').siblings().removeClass('active');
+    handleSelect(key, href) {
+        this.setState({key: key});
+        window.location.href = href;
     }
     
     render() {
         return (
-            <nav className="navbar navbar-inverse navbar-fixed-top" role="navigation">
-                <div className="container">
-                    <div className="navbar-header">
-                        <button type="button" className="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                            <span className="sr-only">Toggle navigation</span>
-                            <span className="icon-bar"></span>
-                            <span className="icon-bar"></span>
-                            <span className="icon-bar"></span>
-                        </button>
-                        <a className="navbar-brand" href="/">Прогноз погоды</a>
-                    </div>
-                    <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                        <ul className="nav navbar-nav">
-                            <li onClick={this.onClick.bind(this)}><Link to='main'>Главная</Link></li>
-                            <li onClick={this.onClick.bind(this)}><Link to='detail'>Подробно</Link></li>
-                        </ul>
-                        
-                        <Search querySearch={this.querySearch} />
-                    </div>
-                </div>
-            </nav>
+            <Navbar inverse fixedTop>
+                <Navbar.Header>
+                    <Navbar.Brand>Прогноз погоды</Navbar.Brand>
+                    <Navbar.Toggle />
+                </Navbar.Header>
+                <Navbar.Collapse>
+                    <Nav activeKey={this.state.key} onSelect={this.handleSelect.bind(this)}>
+                        <NavItem eventKey={0} href='main'>Главная</NavItem>
+                        <NavItem eventKey={1} href='detail'>Подробно</NavItem>
+                    </Nav>
+                    <Nav pullRight>
+                        <Navbar.Form>
+                            <Input type="text" placeholder="Поиск" defaultValue={this.props.querySearch} onKeyPress={this.onSearchInputKeyPress.bind(this)} />{' '}
+                            <Button type="submit" onClick={this.onSearchButClick.bind(this)}>Поиск</Button>
+                        </Navbar.Form>
+                    </Nav>
+                </Navbar.Collapse>
+            </Navbar>
         );
-        
     }
 }
 
@@ -80,7 +73,7 @@ class App extends React.Component {
         
         return (
             <div>
-                <Navigation querySearch={querySearch} />
+                <NavigationView querySearch={querySearch} />
                 
                 <div className="container">
                     {this.props.children}

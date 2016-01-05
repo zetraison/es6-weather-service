@@ -35,52 +35,54 @@ class ForecastChart extends React.Component {
     renderChart(){
         
         let ranges = this.state.list.map(el => [el.main.temp_min, el.main.temp_max]);
-        let average = this.state.list.map(el => parseFloat(((el.main.temp_min + el.main.temp_max) / 2).toFixed(2)));
+        let categories = this.state.list.map(el => timestampToTime(el.dt) + '<br>' + timestampToDate(el.dt));
         
-        Highcharts.chart("TempCorrelationChart", {
+        Highcharts.chart("TempVariationChart", {
+            chart: {
+                type: 'columnrange',
+                inverted: true
+            },
+    
             title: {
                 text: 'Вариация температуры почасовая, ' + this.state.city.name
             },
-            
+    
             subtitle: {
                 text: 'Источник: Openweathermap.org'
             },
-            
-            xAxis: [{
-                categories: this.state.list.map(el => timestampToTime(el.dt) + '<br>' + timestampToDate(el.dt)),
-                crosshair: true
-            }],
+    
+            xAxis: {
+                categories: categories,
+            },
     
             yAxis: {
                 title: {
-                    text: null
+                    text: 'Температура ( °C )'
                 }
             },
     
             tooltip: {
-                crosshairs: true,
-                shared: true,
                 valueSuffix: '°C'
             },
     
-            series: [{
-                name: 'Средняя температура',
-                data: average,
-                zIndex: 1,
-                marker: {
-                    fillColor: 'white',
-                    lineWidth: 2,
-                    lineColor: Highcharts.getOptions().colors[0]
+            plotOptions: {
+                columnrange: {
+                    dataLabels: {
+                        enabled: true,
+                        formatter: function () {
+                            return this.y + '°C';
+                        }
+                    }
                 }
-            }, {
-                name: 'Интервал',
-                data: ranges,
-                type: 'arearange',
-                lineWidth: 0,
-                linkedTo: ':previous',
-                color: Highcharts.getOptions().colors[0],
-                fillOpacity: 0.3,
-                zIndex: 0
+            },
+    
+            legend: {
+                enabled: false
+            },
+    
+            series: [{
+                name: 'Температура',
+                data: ranges
             }]
         });
     }
@@ -91,7 +93,7 @@ class ForecastChart extends React.Component {
     
     render(){
         return (
-            <div id="TempCorrelationChart"></div>
+            <div id="TempVariationChart"></div>
         );
     }
 }

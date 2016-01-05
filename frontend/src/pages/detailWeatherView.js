@@ -1,10 +1,11 @@
-import React                    from 'react';
+import React                    from 'react/lib/React';
 import ForecastChart            from 'components/weather/view/forecastChart';
 import ForecastDailyChart       from 'components/weather/view/forecastDailyChart';
 import TempCorrelationChart     from 'components/weather/view/tempCorrelationChart';
+import TempVariationChart     from 'components/weather/view/tempVariationChart';
 
 
-class WeatherView2 extends React.Component {
+class DetailWeatherView extends React.Component {
     
     render(){
         
@@ -19,20 +20,27 @@ class WeatherView2 extends React.Component {
                     </div>
                 </div>
                 <div className="row">
-                    <div className="col-md-4 portfolio-item">
+                    <div className="col-md-6 portfolio-item">
+                        <TempCorrelationChart querySearch={querySearch} />
+                        <h3><a href="/by-time">По часам</a></h3>
+                        <p>График вариации температуры по часам</p>
+                    </div>
+                    <div className="col-md-6 portfolio-item">
+                        <TempVariationChart querySearch={querySearch} />
+                        <h3><a href="/by-time">По часам</a></h3>
+                        <p>График вариации температуры по часам</p>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-md-6 portfolio-item">
                         <ForecastChart querySearch={querySearch} />
                         <h3><a href="/by-time">По часам</a></h3>
                         <p>График температуры и влажности с интервалом 3 часа</p>
                     </div>
-                    <div className="col-md-4 portfolio-item">
+                    <div className="col-md-6 portfolio-item">
                         <ForecastDailyChart querySearch={querySearch} />
                         <h3><a href="/by-days">По дням</a></h3>
                         <p>График температуры и влажности на ближайшие 10 дней</p>
-                    </div>
-                    <div className="col-md-4 portfolio-item">
-                        <TempCorrelationChart querySearch={querySearch} />
-                        <h3><a href="/by-time">По часам</a></h3>
-                        <p>График вариации температуры по часам</p>
                     </div>
                 </div>
             </div>
@@ -40,4 +48,4 @@ class WeatherView2 extends React.Component {
     }
 }
 
-export default WeatherView2;
+export default DetailWeatherView;

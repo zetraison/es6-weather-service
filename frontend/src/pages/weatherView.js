@@ -1,4 +1,4 @@
-import React                    from 'react';
+import React                    from 'react/lib/React';
 import CurrentWeather           from 'components/weather/view/currentWeather';
 import MultiChart               from 'components/weather/view/multiChart';
 
@@ -17,7 +17,7 @@ class WeatherView extends React.Component {
                 </div>
                 <div className="row">
                     <div className="col-md-12 portfolio-item">
-                        <MultiChart querySearch={querySearch} />
+                        <MultiChart id="multiChart" querySearch={querySearch} />
                     </div>
                 </div>
             </div>

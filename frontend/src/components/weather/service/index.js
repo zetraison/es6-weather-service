@@ -1,4 +1,4 @@
-import React    from 'react';
+import React    from 'react/lib/React';
 import Service  from 'service';
 import config   from 'config';
 

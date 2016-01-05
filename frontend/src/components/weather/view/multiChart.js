@@ -1,35 +1,68 @@
-import React                from 'react';
+import React                from 'react/lib/React';
+import Tab                  from 'react-bootstrap/lib/Tab';
+import Tabs                 from 'react-bootstrap/lib/Tabs';
+import Nav                  from 'react-bootstrap/lib/Nav';
+import NavItem              from 'react-bootstrap/lib/NavItem';
 import Highcharts           from 'highcharts';
 import {WEATHER_TYPES}      from 'components/weather/service';
 import WeatherService       from 'components/weather/service';
 import config               from 'config';
-import {timestampToTime, timestampToDate} from 'util/util';
+import {timestampToTime, 
+        timestampToDate, 
+        buildIconUrl, 
+        convertingHpaTommHg} from 'util/util';
 
 let weatherService = new WeatherService();
+
 let FORECAST_DAYS_LIMIT = 5;
 let TIME_INTERVAL_LIMIT = 8;
 
-class Navs extends React.Component {
-    
-    render(){
-        return (
-            <ul className="nav nav-tabs">
-                <li className="active"><a href="#" data-type="temp" onClick={this.props.onClick}>Температура</a></li>
-                <li><a href="#" data-type="humidity" onClick={this.props.onClick}>Влажность</a></li>
-                <li><a href="#" data-type="pressure" onClick={this.props.onClick}>Давление</a></li>
-                <li><a href="#" data-type="wind" onClick={this.props.onClick}>Ветер</a></li>
-            </ul>
-        );
-    }
-}
+let TAB_INDEX = {
+    0: 'temp',
+    1: 'humidity',
+    2: 'pressure',
+    3: 'wind'
+};
 
-class Pagination extends React.Component {
+class UnitTabs extends React.Component {
     
     constructor(props){
         super(props);
         this.state = {
+            key: 0
+        };
+    }
+    
+    handleSelect(key) {
+        this.setState({key});
+        this.props.handleSelect(key);
+    }
+    
+    render(){
+        return (
+            <Tabs activeKey={this.state.key} onSelect={this.handleSelect.bind(this)}>
+                <Tab eventKey={0} title="Температура"></Tab>
+                <Tab eventKey={1} title="Влажность"></Tab>
+                <Tab eventKey={2} title="Давление"></Tab>
+                <Tab eventKey={3} title="Ветер"></Tab>
+            </Tabs>
+        );
+    }
+}
+
+class DayNavs extends React.Component {
+    
+    constructor(props){
+        super(props);
+        this.state = {
+            key: 0,
             list: []
         };
+    }
+    
+    handleSelect(key) {
+        this.setState({key: key});
+        this.props.handleSelect(this.state.list[key].dt);
     }
     
     refreshData(){
@@ -49,39 +82,30 @@ class Pagination extends React.Component {
     }
     
     render(){
+        let list = this.state.list.filter(el => new Date(el.dt * 1000).getDate() >= new Date().getDate()).slice(0, FORECAST_DAYS_LIMIT);
         
-        let c = new Date().getDate();
-        
-        let list = this.state.list.filter(el => {
+        let navs = list.map((el, index) => {
             
-            let d = new Date(el.dt * 1000).getDate();
-            
-            return d >= c;
-            
-        }).slice(0, FORECAST_DAYS_LIMIT);
-        
-        list[0] ? list[0].isFirst = true : null;
-        
-        let navs = list.map(el => {
-            
-            let src = (config.openWeatherMap.imgUrl + el.weather[0].icon + '.png');
-            let pressure = Math.round(config.hpaTommHgCoeff * el.pressure);
+            let src = buildIconUrl(el.weather[0].icon);
+            let day = timestampToDate(el.dt);
+            let temp = (<p>{Math.round(el.temp.day)}° <span className="min-temp">{Math.round(el.temp.night)}°</span></p>);
+            let pressure = convertingHpaTommHg(el.pressure);
             
             return (
-                <li key={el.dt} data-dt={el.dt - 9 * 60 * 60} className={el.isFirst ? "active" : ""}><a href="#" onClick={this.props.onClick.bind(this)}> 
+                <NavItem eventKey={index} key={index}>
                     <p><img src={src} /></p>
-                    <p>{timestampToDate(el.dt)}</p>
-                    <p>{Math.round(el.temp.day)}° <span className="min-temp">{Math.round(el.temp.night)}°</span></p>
+                    <p>{day}</p>
+                    {temp}
                     <p>{el.humidity}%</p>
                     <p>{pressure} мм рт.ст.</p>
-                </a></li>
+                </NavItem>
             );
         });
         
         return (
-            <nav className="daily-weather">
-                <ul className="pagination">{navs}</ul>
-            </nav>
+            <Nav bsStyle="pills" activeKey={this.state.key} onSelect={this.handleSelect.bind(this)}>
+                {navs}
+            </Nav>
         );
     }
 }
@@ -130,8 +154,15 @@ class ForecastChart extends React.Component {
             'temp': {
                 label: 'Температура', 
                 valueSuffix: "°C", 
-                type: "spline", data: 
-                list.map(el => el.main.temp)
+                type: "spline", 
+                data: list.map(el => {
+                    return {
+                        y: el.main.temp, 
+                        marker: {
+                            symbol: 'url(' + buildIconUrl(el.weather[0].icon) + ')'
+                        }
+                    };
+                })
             },
             'humidity': {
                 label: 'Влажность', 
@@ -143,7 +174,7 @@ class ForecastChart extends React.Component {
                 label: 'Давление', 
                 valueSuffix: " мм рт.ст.", 
                 type: "spline", 
-                data: list.map(el =>  Math.round(config.hpaTommHgCoeff * el.main.pressure))
+                data: list.map(el => convertingHpaTommHg(el.main.pressure))
             },
             'wind': {
                 label: 'Ветер', 
@@ -160,7 +191,7 @@ class ForecastChart extends React.Component {
         let type = units[unit].type;
         let valueSuffix = units[unit].valueSuffix;
         
-        Highcharts.chart("multiChart", {
+        Highcharts.chart(this.props.id, {
             chart: {
                 zoomType: 'xy'
             },
@@ -205,20 +236,15 @@ class ForecastChart extends React.Component {
         });
     }
     
-    onNavTabChange(e){
-        $(e.target).parent().addClass('active').siblings().removeClass('active');
-        
-        let index = e.target.getAttribute('data-type');
-        let date = $('.daily-weather li.active').attr('data-dt');
-        this.renderChart(index, date);
+    handleSelectUnits(key){
+        let index = this.refs["DayNavs"].state.key;
+        let date = this.refs["DayNavs"].state.list[index].dt;
+        this.renderChart(TAB_INDEX[key], date);
     }
     
-    onPaginationChange(e) {
-        $(e.target).closest("li").addClass('active').siblings().removeClass('active');
-        
-        let index = $('.nav-tabs li.active a').attr('data-type');
-        let date = $(e.target).closest("li").attr('data-dt');
-        this.renderChart(index, date);
+    handleSelectDays(date) {
+        let key = this.refs["TabsUnits"].state.key;
+        this.renderChart(TAB_INDEX[key], date);
     }
     
     componentDidMount(){
@@ -228,9 +254,9 @@ class ForecastChart extends React.Component {
     render(){
         return (
             <div>
-                <Navs onClick={this.onNavTabChange.bind(this)} />
-                <div id="multiChart"></div>
-                <Pagination onClick={this.onPaginationChange.bind(this)} />
+                <UnitTabs ref="TabsUnits" handleSelect={this.handleSelectUnits.bind(this)} />
+                <div id={this.props.id}></div>
+                <DayNavs ref="DayNavs" handleSelect={this.handleSelectDays.bind(this)} />
             </div>
         );
     }

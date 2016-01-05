@@ -1,4 +1,4 @@
-import React                from 'react';
+import React                from 'react/lib/React';
 import Highcharts           from 'highcharts';
 import {WEATHER_TYPES}      from 'components/weather/service';
 import WeatherService       from 'components/weather/service';
