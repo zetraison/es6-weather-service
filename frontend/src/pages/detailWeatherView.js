@@ -1,8 +1,10 @@
 import React                    from 'react/lib/React';
 import ForecastChart            from 'components/weather/view/forecastChart';
 import ForecastDailyChart       from 'components/weather/view/forecastDailyChart';
-import TempCorrelationChart     from 'components/weather/view/tempCorrelationChart';
-import TempVariationChart     from 'components/weather/view/tempVariationChart';
+import TempVariationColumnChart from 'components/weather/view/tempVariationColumnChart';
+import TempVariationSplineChart from 'components/weather/view/tempVariationSplineChart';
+import WindSpeedChart           from 'components/weather/view/windSpeedChart';
+import PrecipitationChart       from 'components/weather/view/precipitationChart';
 
 
 class DetailWeatherView extends React.Component {
@@ -19,18 +21,25 @@ class DetailWeatherView extends React.Component {
                         <h1 className="page-header">Погода</h1>
                     </div>
                 </div>
+                
                 <div className="row">
                     <div className="col-md-6 portfolio-item">
-                        <TempCorrelationChart querySearch={querySearch} />
-                        <h3><a href="/by-time">По часам</a></h3>
-                        <p>График вариации температуры по часам</p>
+                        <TempVariationSplineChart id="tempVariationSplineChart" querySearch={querySearch} />
                     </div>
                     <div className="col-md-6 portfolio-item">
-                        <TempVariationChart querySearch={querySearch} />
-                        <h3><a href="/by-time">По часам</a></h3>
-                        <p>График вариации температуры по часам</p>
+                        <TempVariationColumnChart id="tempVariationColumnChart" querySearch={querySearch} />
                     </div>
                 </div>
+                
+                <div className="row">
+                    <div className="col-md-6 portfolio-item">
+                        <WindSpeedChart id="windSpeedChart" querySearch={querySearch} />
+                    </div>
+                    <div className="col-md-6 portfolio-item">
+                        <PrecipitationChart id="precipitationChart" querySearch={querySearch} />
+                    </div>
+                </div>
+                
                 <div className="row">
                     <div className="col-md-6 portfolio-item">
                         <ForecastChart querySearch={querySearch} />
@@ -43,6 +52,7 @@ class DetailWeatherView extends React.Component {
                         <p>График температуры и влажности на ближайшие 10 дней</p>
                     </div>
                 </div>
+                
             </div>
         );
     }

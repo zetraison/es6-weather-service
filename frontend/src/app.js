@@ -3,7 +3,9 @@ import ReactDOM                     from 'react/lib/ReactDOM';
 import Router                       from 'react-router/lib/Router';
 import Route                        from 'react-router/lib/Route';
 import Redirect                     from 'react-router/lib/Redirect';
-import { Navigation }               from 'react-router';
+import Link                         from 'react-router/lib/Link';
+import RouteContext                 from 'react-router/lib/RouteContext';
+import ReactMixin                   from 'react-mixin';
 import Nav                          from 'react-bootstrap/lib/Nav';
 import NavItem                      from 'react-bootstrap/lib/NavItem';
 import Navbar                       from 'react-bootstrap/lib/Navbar';
@@ -17,8 +19,8 @@ import {appendBody}                 from 'util/util';
 const history = createBrowserHistory();
 
 class NavigationView extends React.Component {
-    
-    constructor(props){
+
+    constructor(props, context){
         super(props);
         this.state = {
             key: 0
@@ -36,9 +38,13 @@ class NavigationView extends React.Component {
         window.location = '?q=' + $('input.form-control')[0].value;
     }
     
-    handleSelect(key, href) {
+    handleClick(key) {
         this.setState({key: key});
-        window.location.href = href;
+    }
+    
+    className(key) {
+        console.log(this.props.querySearch);
+        return this.state.key == key ? 'active' : '';
     }
     
     render() {
@@ -49,9 +55,9 @@ class NavigationView extends React.Component {
                     <Navbar.Toggle />
                 </Navbar.Header>
                 <Navbar.Collapse>
-                    <Nav activeKey={this.state.key} onSelect={this.handleSelect.bind(this)}>
-                        <NavItem eventKey={0} href='main'>Главная</NavItem>
-                        <NavItem eventKey={1} href='detail'>Подробно</NavItem>
+                    <Nav>
+                        <li onClick={this.handleClick.bind(this, 0)} className={this.className(0)}><Link to="main">Главная</Link></li>
+                        <li onClick={this.handleClick.bind(this, 1)} className={this.className(1)}><Link to="detail">Подробно</Link></li>
                     </Nav>
                     <Nav pullRight>
                         <Navbar.Form>
@@ -64,6 +70,8 @@ class NavigationView extends React.Component {
         );
     }
 }
+
+//ReactMixin(NavigationView.prototype, RouteContext);
 
 class App extends React.Component {
     

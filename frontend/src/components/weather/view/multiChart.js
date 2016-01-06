@@ -10,7 +10,8 @@ import config               from 'config';
 import {timestampToTime, 
         timestampToDate, 
         buildIconUrl, 
-        convertingHpaTommHg} from 'util/util';
+        convertingHpaTommHg,
+        getCurrentPosition} from 'util/util';
 
 let weatherService = new WeatherService();
 
@@ -21,7 +22,8 @@ let TAB_INDEX = {
     0: 'temp',
     1: 'humidity',
     2: 'pressure',
-    3: 'wind'
+    3: 'wind',
+    4: 'precipitation'
 };
 
 class UnitTabs extends React.Component {
@@ -45,6 +47,7 @@ class UnitTabs extends React.Component {
                 <Tab eventKey={1} title="Влажность"></Tab>
                 <Tab eventKey={2} title="Давление"></Tab>
                 <Tab eventKey={3} title="Ветер"></Tab>
+                <Tab eventKey={4} title="Осадки"></Tab>
             </Tabs>
         );
     }
@@ -56,7 +59,8 @@ class DayNavs extends React.Component {
         super(props);
         this.state = {
             key: 0,
-            list: []
+            list: [],
+            cityName: props.querySearch
         };
     }
     
@@ -67,14 +71,25 @@ class DayNavs extends React.Component {
     
     refreshData(){
         
-        let cityName = this.props.querySearch ? this.props.querySearch : config.defaultCity;
         let limit = FORECAST_DAYS_LIMIT + 1;
         
-        weatherService.byCityName(cityName, WEATHER_TYPES['FORECAST_DAILY'], limit, response => {
-            this.setState({
-                list: response.list
+        if (this.state.cityName) {
+            weatherService.byCityName(this.state.cityName, WEATHER_TYPES['FORECAST_DAILY'], limit, response => {
+                this.setState({
+                    list: response.list.filter(el => new Date(el.dt * 1000).getDate() >= new Date().getDate()),
+                    cityName: response.city.name
+                });
             });
-        });
+        } else {
+            getCurrentPosition().then((coords) => {
+                weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['FORECAST_DAILY'], limit, response => {
+                    this.setState({
+                        list: response.list.filter(el => new Date(el.dt * 1000).getDate() >= new Date().getDate()),
+                        cityName: response.city.name
+                    });
+                });
+            });
+        }
     }
     
     componentWillMount(){
@@ -82,7 +97,7 @@ class DayNavs extends React.Component {
     }
     
     render(){
-        let list = this.state.list.filter(el => new Date(el.dt * 1000).getDate() >= new Date().getDate()).slice(0, FORECAST_DAYS_LIMIT);
+        let list = this.state.list.slice(0, FORECAST_DAYS_LIMIT);
         
         let navs = list.map((el, index) => {
             
@@ -115,23 +130,53 @@ class ForecastChart extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            city: null,
-            list: []
+            list: [],
+            cityName: props.querySearch,
+            sys: null
         };
     }
     
     refreshData(callback){
         
-        let cityName = this.props.querySearch ? this.props.querySearch : config.defaultCity;
         let limit = TIME_INTERVAL_LIMIT * FORECAST_DAYS_LIMIT;
         
-        weatherService.byCityName(cityName, WEATHER_TYPES['FORECAST'], limit, response => {
-            this.setState({ 
-                city: response.city,
-                list: response.list,
+        if (this.state.cityName) {
+            weatherService.byCityName(this.state.cityName, WEATHER_TYPES['FORECAST'], limit, response => {
+                this.setState({
+                    cityName: response.city.name,
+                    list: response.list
+                });
+                
+                weatherService.byCityName(this.state.cityName, WEATHER_TYPES['CURRENT'], null, response => {
+                    this.setState({
+                        sys: response.sys
+                    });
+                    callback();
+                });
+            
             });
-            callback();
-        });
+        } else {
+            getCurrentPosition().then((coords) => {
+                weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['FORECAST'], limit, response => {
+                    this.setState({
+                        cityName: response.city.name,
+                        list: response.list
+                    });
+                    
+                    weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['CURRENT'], null, response => {
+                        this.setState({
+                            sys: response.sys
+                        });
+                        callback();
+                    });
+                });
+            });
+        }
+    }
+    
+    calcSunCoord(dt) {
+        let d = new Date(dt * 1000);
+        return (d.getHours() + d.getMinutes() / 60) * 8 / 24 - 0.5;
     }
     
     renderChart(unit, dt){
@@ -139,16 +184,16 @@ class ForecastChart extends React.Component {
         unit = unit || 'temp';
         
         let c = new Date().getDate();
-        let t = new Date(dt * 1000).getDate();
+        let t = new Date(dt * 1000).getDate() || c;
         
         let list = this.state.list.filter(el => {
             
             let d = new Date(el.dt * 1000).getDate();
             
-            return d <= (!t || t == c ? c + 1 : t);
+            return d <= (t == c ? c + 1 : t);
         });
         
-        list = !t || t == c ? list.slice(0, TIME_INTERVAL_LIMIT) : list.slice(-TIME_INTERVAL_LIMIT);
+        list = t == c ? list.slice(0, TIME_INTERVAL_LIMIT) : list.slice(-TIME_INTERVAL_LIMIT);
         
         let units = {
             'temp': {
@@ -165,44 +210,100 @@ class ForecastChart extends React.Component {
                 })
             },
             'humidity': {
-                label: 'Влажность', 
+                label: 'Влажность (%)', 
                 valueSuffix: "%", 
-                type: "column", 
+                type: "spline", 
                 data: list.map(el => el.main.humidity)
             },
             'pressure': {
-                label: 'Давление', 
+                label: 'Давление (мм рт.ст.)', 
                 valueSuffix: " мм рт.ст.", 
                 type: "spline", 
                 data: list.map(el => convertingHpaTommHg(el.main.pressure))
             },
             'wind': {
-                label: 'Ветер', 
+                label: 'Ветер (м/с)', 
                 valueSuffix: " м/с", 
-                type: "column", 
+                type: "spline", 
                 data: list.map(el => el.wind.speed)
+            },
+            'precipitation': {
+                label: 'Осадки (мм)', 
+                valueSuffix: " мм", 
+                type: "areaspline", 
+                data: list.map(el => el.snow['3h'] * 1000)
             }
         };
         
-        let cityName = this.state.city.name;
         let categories = list.map(el => timestampToTime(el.dt) + '<br>' + timestampToDate(el.dt));
         let data = units[unit].data;
         let label = units[unit].label;
         let type = units[unit].type;
         let valueSuffix = units[unit].valueSuffix;
         
+        let startDay = c == t ? -0.5 : 0;
+        let endDay = c == t ? 7.5 : 0;
+        
+        let sunrise = c == t ? this.calcSunCoord(this.state.sys.sunrise) : startDay;
+        let sunset = c == t ? this.calcSunCoord(this.state.sys.sunset) : endDay;
+        
+        let nowDt = new Date().getTime() / 1000;
+        let current1 = c == t ? this.calcSunCoord(nowDt) : 0;
+        let current2 = c == t ? this.calcSunCoord(nowDt) + 0.01 : 0;
+        
         Highcharts.chart(this.props.id, {
             chart: {
                 zoomType: 'xy'
             },
             title: {
-                text: 'Почасовой прогноз погоды, ' + cityName
+                text: 'Почасовой прогноз погоды на ' + (dt ? timestampToDate(dt) : timestampToDate(new Date().getTime() / 1000)) + ', ' +  this.state.cityName
             },
             subtitle: {
                 text: 'Источник: Openweathermap.org'
             },
             xAxis: [{
                 categories: categories,
+                plotBands: [{
+                    from: startDay,
+                    to: sunrise,
+                    color: 'rgba(68, 170, 213, .1)',
+                    label: {
+                        text: 'Ночь',
+                        style: {
+                            color: '#606060'
+                        }
+                    }
+                }, {
+                    from: sunrise,
+                    to: sunset,
+                    color: 'rgba(255, 255, 20, .3)',
+                    label: {
+                        text: 'День',
+                        style: {
+                            color: '#606060'
+                        }
+                    }
+                }, {
+                    from: sunset,
+                    to: endDay,
+                    color: 'rgba(68, 170, 213, .1)',
+                    label: {
+                        text: 'Ночь',
+                        style: {
+                            color: '#606060'
+                        }
+                    }
+                }, {
+                    from: current1,
+                    to: current2,
+                    color: 'rgba(0, 0, 255, .8)',
+                    label: {
+                        text: 'Сейчас <br>' + timestampToTime(new Date().getTime() / 1000),
+                        style: {
+                            color: '#606060'
+                        }
+                    }
+                }],
                 crosshair: true
             }],
             yAxis: [{

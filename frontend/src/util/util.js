@@ -36,7 +36,7 @@ export function getCurrentPosition(){
     return new Promise((resolve, reject) => {
         
         navigator.geolocation.getCurrentPosition(res => {
-            resolve([Math.floor(res.coords.latitude), Math.floor(res.coords.longitude)]);
+            resolve([res.coords.latitude, res.coords.longitude]);
         });
     });
 }

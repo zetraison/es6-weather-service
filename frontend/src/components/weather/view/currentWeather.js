@@ -3,7 +3,9 @@ import Highcharts           from 'highcharts';
 import {WEATHER_TYPES}      from 'components/weather/service';
 import WeatherService       from 'components/weather/service';
 import config               from 'config';
-import {timestampToTime, timestampToDate} from 'util/util';
+import {timestampToTime, 
+        timestampToDate, 
+        getCurrentPosition} from 'util/util';
 
 let weatherService = new WeatherService();
 
@@ -12,7 +14,7 @@ class CurrentWeatherChart extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            cityName: null,
+            cityName: props.querySearch,
             main: null,
             weather: [],
             wind: null,
@@ -23,18 +25,31 @@ class CurrentWeatherChart extends React.Component {
     
     refreshData(){
         
-        let cityName = this.props.querySearch ? this.props.querySearch : config.defaultCity;
-        
-        weatherService.byCityName(cityName, WEATHER_TYPES['CURRENT'], null, response => {
-            this.setState({
-                cityName: response.name,
-                main: response.main,
-                weather: response.weather[0],
-                wind: response.wind,
-                sys: response.sys,
-                visibility: response.visibility
+        if (this.state.cityName) {
+            weatherService.byCityName(this.state.cityName, WEATHER_TYPES['CURRENT'], null, response => {
+                this.setState({
+                    cityName: response.name,
+                    main: response.main,
+                    weather: response.weather[0],
+                    wind: response.wind,
+                    sys: response.sys,
+                    visibility: response.visibility
+                });
             });
-        });
+        } else {
+            getCurrentPosition().then((coords) => {
+                weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['CURRENT'], null, response => {
+                    this.setState({
+                        cityName: response.name,
+                        main: response.main,
+                        weather: response.weather[0],
+                        wind: response.wind,
+                        sys: response.sys,
+                        visibility: response.visibility
+                    });
+                });
+            });
+        }
     }
     
     componentDidMount(){

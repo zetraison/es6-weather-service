@@ -4,32 +4,45 @@ require('highcharts/highcharts-more')(Highcharts);
 import {WEATHER_TYPES}      from 'components/weather/service';
 import WeatherService       from 'components/weather/service';
 import config               from 'config';
-import {timestampToTime, timestampToDate} from 'util/util';
+import {timestampToTime, 
+        timestampToDate, 
+        getCurrentPosition} from 'util/util';
 
 let weatherService = new WeatherService();
 
-class ForecastChart extends React.Component {
+class tempVariationColumnChart extends React.Component {
     
     constructor(props){
         super(props);
         this.state = {
-            city: null,
+            cityName: props.querySearch,
             list: []
         };
     }
     
     refreshData(callback){
         
-        let cityName = this.props.querySearch ? this.props.querySearch : config.defaultCity;
         let limit = 8;
         
-        weatherService.byCityName(cityName, WEATHER_TYPES['FORECAST'], limit, response => {
-            this.setState({ 
-                city: response.city,
-                list: response.list,
+        if (this.state.cityName) {
+            weatherService.byCityName(this.state.cityName, WEATHER_TYPES['FORECAST'], limit, response => {
+                this.setState({
+                    list: response.list,
+                    cityName: response.city.name
+                });
+                callback();
             });
-            callback();
-        });
+        } else {
+            getCurrentPosition().then((coords) => {
+                weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['FORECAST'], limit, response => {
+                    this.setState({
+                        list: response.list,
+                        cityName: response.city.name
+                    });
+                    callback();
+                });
+            });
+        }
     }
     
     renderChart(){
@@ -37,14 +50,14 @@ class ForecastChart extends React.Component {
         let ranges = this.state.list.map(el => [el.main.temp_min, el.main.temp_max]);
         let categories = this.state.list.map(el => timestampToTime(el.dt) + '<br>' + timestampToDate(el.dt));
         
-        Highcharts.chart("TempVariationChart", {
+        Highcharts.chart(this.props.id, {
             chart: {
                 type: 'columnrange',
                 inverted: true
             },
     
             title: {
-                text: 'Вариация температуры почасовая, ' + this.state.city.name
+                text: 'Вариация температуры почасовая, ' + this.state.cityName
             },
     
             subtitle: {
@@ -93,9 +106,9 @@ class ForecastChart extends React.Component {
     
     render(){
         return (
-            <div id="TempVariationChart"></div>
+            <div id={this.props.id}></div>
         );
     }
 }
 
-export default ForecastChart;
+export default tempVariationColumnChart;
