@@ -8,9 +8,6 @@ export default {
         apikey: '903eab4b735b99ef49009d96288384a4'
     },
     
-    // Set default city for weather showing
-    defaultCity: 'Moscow',
-    
     // Coefficient for converting pressure units from hPa into mmHg
     hpaTommHgCoeff: 0.75008
 };

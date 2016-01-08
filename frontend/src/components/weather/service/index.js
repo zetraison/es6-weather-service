@@ -8,9 +8,9 @@ export const WEATHER_RESPONSE_MODES = {
 };
 
 export const WEATHER_TYPES = {
-    CURRENT:        'weather',
-    FORECAST:       'forecast',
-    FORECAST_DAILY: 'forecast/daily'
+    CURRENT:            'weather',
+    FORECAST_HOURLY:    'forecast',
+    FORECAST_DAILY:     'forecast/daily'
 };
 
 export const WEATHER_UNITS = {

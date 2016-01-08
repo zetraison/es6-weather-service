@@ -1,19 +1,12 @@
 import React                from 'react/lib/React';
-import Tab                  from 'react-bootstrap/lib/Tab';
-import Tabs                 from 'react-bootstrap/lib/Tabs';
 import Nav                  from 'react-bootstrap/lib/Nav';
 import NavItem              from 'react-bootstrap/lib/NavItem';
 import Highcharts           from 'highcharts';
-import {WEATHER_TYPES}      from 'components/weather/service';
-import WeatherService       from 'components/weather/service';
 import config               from 'config';
 import {timestampToTime, 
         timestampToDate, 
         buildIconUrl, 
-        convertingHpaTommHg,
-        getCurrentPosition} from 'util/util';
-
-let weatherService = new WeatherService();
+        convertingHpaTommHg} from 'util';
 
 let FORECAST_DAYS_LIMIT = 5;
 let TIME_INTERVAL_LIMIT = 8;
@@ -42,13 +35,13 @@ class UnitTabs extends React.Component {
     
     render(){
         return (
-            <Tabs activeKey={this.state.key} onSelect={this.handleSelect.bind(this)}>
-                <Tab eventKey={0} title="Температура"></Tab>
-                <Tab eventKey={1} title="Влажность"></Tab>
-                <Tab eventKey={2} title="Давление"></Tab>
-                <Tab eventKey={3} title="Ветер"></Tab>
-                <Tab eventKey={4} title="Осадки"></Tab>
-            </Tabs>
+            <Nav bsStyle="tabs" activeKey={this.state.key} onSelect={this.handleSelect.bind(this)}>
+                <NavItem eventKey={0}>Температура</NavItem>
+                <NavItem eventKey={1}>Влажность</NavItem>
+                <NavItem eventKey={2}>Давление</NavItem>
+                <NavItem eventKey={3}>Ветер</NavItem>
+                <NavItem eventKey={4}>Осадки</NavItem>
+            </Nav>
         );
     }
 }
@@ -59,47 +52,19 @@ class DayNavs extends React.Component {
         super(props);
         this.state = {
             key: 0,
-            list: [],
-            cityName: props.querySearch
+            data: props.data
         };
     }
     
     handleSelect(key) {
         this.setState({key: key});
-        this.props.handleSelect(this.state.list[key].dt);
-    }
-    
-    refreshData(){
-        
-        let limit = FORECAST_DAYS_LIMIT + 1;
-        
-        if (this.state.cityName) {
-            weatherService.byCityName(this.state.cityName, WEATHER_TYPES['FORECAST_DAILY'], limit, response => {
-                this.setState({
-                    list: response.list.filter(el => new Date(el.dt * 1000).getDate() >= new Date().getDate()),
-                    cityName: response.city.name
-                });
-            });
-        } else {
-            getCurrentPosition().then((coords) => {
-                weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['FORECAST_DAILY'], limit, response => {
-                    this.setState({
-                        list: response.list.filter(el => new Date(el.dt * 1000).getDate() >= new Date().getDate()),
-                        cityName: response.city.name
-                    });
-                });
-            });
-        }
-    }
-    
-    componentWillMount(){
-        this.refreshData();
+        this.props.handleSelect(this.state.data[key].dt);
     }
     
     render(){
-        let list = this.state.list.slice(0, FORECAST_DAYS_LIMIT);
+        let data = this.state.data.slice(0, FORECAST_DAYS_LIMIT);
         
-        let navs = list.map((el, index) => {
+        let navs = data.map((el, index) => {
             
             let src = buildIconUrl(el.weather[0].icon);
             let day = timestampToDate(el.dt);
@@ -125,53 +90,17 @@ class DayNavs extends React.Component {
     }
 }
 
-class ForecastChart extends React.Component {
+class MultiChart extends React.Component {
     
     constructor(props){
         super(props);
         this.state = {
-            list: [],
-            cityName: props.querySearch,
-            sys: null
+            id: props.id,
+            city: props.city,
+            dataCurrent: props.dataCurrent,
+            dataHourly: props.dataHourly,
+            dataDaily: props.dataDaily
         };
-    }
-    
-    refreshData(callback){
-        
-        let limit = TIME_INTERVAL_LIMIT * FORECAST_DAYS_LIMIT;
-        
-        if (this.state.cityName) {
-            weatherService.byCityName(this.state.cityName, WEATHER_TYPES['FORECAST'], limit, response => {
-                this.setState({
-                    cityName: response.city.name,
-                    list: response.list
-                });
-                
-                weatherService.byCityName(this.state.cityName, WEATHER_TYPES['CURRENT'], null, response => {
-                    this.setState({
-                        sys: response.sys
-                    });
-                    callback();
-                });
-            
-            });
-        } else {
-            getCurrentPosition().then((coords) => {
-                weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['FORECAST'], limit, response => {
-                    this.setState({
-                        cityName: response.city.name,
-                        list: response.list
-                    });
-                    
-                    weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['CURRENT'], null, response => {
-                        this.setState({
-                            sys: response.sys
-                        });
-                        callback();
-                    });
-                });
-            });
-        }
     }
     
     calcSunCoord(dt) {
@@ -181,12 +110,15 @@ class ForecastChart extends React.Component {
     
     renderChart(unit, dt){
         
+        let dataHourly = this.state.dataHourly;
+        let dataCurrent = this.state.dataCurrent;
+        
         unit = unit || 'temp';
         
         let c = new Date().getDate();
         let t = new Date(dt * 1000).getDate() || c;
         
-        let list = this.state.list.filter(el => {
+        let list = dataHourly.filter(el => {
             
             let d = new Date(el.dt * 1000).getDate();
             
@@ -235,17 +167,20 @@ class ForecastChart extends React.Component {
             }
         };
         
+        let title = 'Почасовой прогноз погоды на ' + (dt ? timestampToDate(dt) : timestampToDate(new Date().getTime() / 1000)) + ', ' + this.state.city;
+        let subtitle = 'Источник: Openweathermap.org';
+        
         let categories = list.map(el => timestampToTime(el.dt) + '<br>' + timestampToDate(el.dt));
         let data = units[unit].data;
         let label = units[unit].label;
-        let type = units[unit].type;
-        let valueSuffix = units[unit].valueSuffix;
+        let chartType = units[unit].type;
+        let unitSuffix = units[unit].valueSuffix;
         
         let startDay = c == t ? -0.5 : 0;
         let endDay = c == t ? 7.5 : 0;
         
-        let sunrise = c == t ? this.calcSunCoord(this.state.sys.sunrise) : startDay;
-        let sunset = c == t ? this.calcSunCoord(this.state.sys.sunset) : endDay;
+        let sunrise = c == t ? this.calcSunCoord(dataCurrent.sys.sunrise) : startDay;
+        let sunset = c == t ? this.calcSunCoord(dataCurrent.sys.sunset) : endDay;
         
         let nowDt = new Date().getTime() / 1000;
         let current1 = c == t ? this.calcSunCoord(nowDt) : 0;
@@ -256,10 +191,10 @@ class ForecastChart extends React.Component {
                 zoomType: 'xy'
             },
             title: {
-                text: 'Почасовой прогноз погоды на ' + (dt ? timestampToDate(dt) : timestampToDate(new Date().getTime() / 1000)) + ', ' +  this.state.cityName
+                text: title
             },
             subtitle: {
-                text: 'Источник: Openweathermap.org'
+                text: subtitle
             },
             xAxis: [{
                 categories: categories,
@@ -308,7 +243,7 @@ class ForecastChart extends React.Component {
             }],
             yAxis: [{
                 labels: {
-                    format: '{value}' + valueSuffix,
+                    format: '{value}' + unitSuffix,
                     style: {
                         color: Highcharts.getOptions().colors[1]
                     }
@@ -328,10 +263,10 @@ class ForecastChart extends React.Component {
             },
             series: [{
                 name: label,
-                type: type,
+                type: chartType,
                 data: data,
                 tooltip: {
-                    valueSuffix: valueSuffix
+                    valueSuffix: unitSuffix
                 }
             }]
         });
@@ -339,7 +274,7 @@ class ForecastChart extends React.Component {
     
     handleSelectUnits(key){
         let index = this.refs["DayNavs"].state.key;
-        let date = this.refs["DayNavs"].state.list[index].dt;
+        let date = this.refs["DayNavs"].state.data[index].dt;
         this.renderChart(TAB_INDEX[key], date);
     }
     
@@ -349,18 +284,18 @@ class ForecastChart extends React.Component {
     }
     
     componentDidMount(){
-        this.refreshData(this.renderChart.bind(this));
+        this.renderChart();
     }
     
     render(){
         return (
             <div>
                 <UnitTabs ref="TabsUnits" handleSelect={this.handleSelectUnits.bind(this)} />
-                <div id={this.props.id}></div>
-                <DayNavs ref="DayNavs" handleSelect={this.handleSelectDays.bind(this)} />
+                <div id={this.state.id}></div>
+                <DayNavs ref="DayNavs" data={this.state.dataDaily} handleSelect={this.handleSelectDays.bind(this)} />
             </div>
         );
     }
 }
 
-export default ForecastChart;
+export default MultiChart;

@@ -4,16 +4,22 @@ body {
     overflow-x: hidden;
 }
 
+.container {
+    width: 1000px;
+}
+
 .jumbotron {
     background: url(../images/background_sky.jpg) no-repeat;
     background-size: cover;
     background-position: right 0px bottom 0px;
     color: #ffffff;
     text-shadow: 1px 1px 1px blue;
-    padding-top: 36px;
-    padding-bottom: 36px;
+    padding-top: 24px;
+    padding-bottom: 24px;
     margin-bottom: 5px;
 }
+
+/* Multychart tabs */
 
 .nav-tabs > li, .nav-pills > li {
     float:none;
@@ -29,6 +35,48 @@ body {
     font-size: 0.8em;
     text-align: center;
 }
+
+/* end Multychart tabs */
+
+/* Not found page */
+
+.error-template {
+    padding: 40px 15px;
+    text-align: center;
+}
+.error-actions {
+    margin-top:15px;
+    margin-bottom:15px;
+}
+.error-actions .btn { 
+    margin-right:10px; 
+}
+
+/* end Not found page */
+
+/* throbber component */
+
+.throbberWrapper {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: auto;
+}
+
+.throbberContainer {
+    width: 80px;
+    height: 80px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -20px 0 0 -20px;
+    background: url(../images/throbber.gif) no-repeat;
+    background-size: cover;
+}
+
+/* end throbber component */
 
 .weather-icon {
     width: 60px;

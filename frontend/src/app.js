@@ -1,29 +1,29 @@
-import React                        from 'react/lib/React';
-import ReactDOM                     from 'react/lib/ReactDOM';
-import Router                       from 'react-router/lib/Router';
-import Route                        from 'react-router/lib/Route';
-import Redirect                     from 'react-router/lib/Redirect';
-import Link                         from 'react-router/lib/Link';
-import RouteContext                 from 'react-router/lib/RouteContext';
-import ReactMixin                   from 'react-mixin';
-import Nav                          from 'react-bootstrap/lib/Nav';
-import NavItem                      from 'react-bootstrap/lib/NavItem';
-import Navbar                       from 'react-bootstrap/lib/Navbar';
-import Input                        from 'react-bootstrap/lib/Input';
-import Button                       from 'react-bootstrap/lib/Button';
-import createBrowserHistory         from 'history/lib/createBrowserHistory';
-import WeatherView                  from 'pages/weatherView';
-import DetailWeatherView            from 'pages/detailWeatherView';
-import {appendBody}                 from 'util/util';
+import React                from 'react/lib/React';
+import ReactDOM             from 'react/lib/ReactDOM';
+import Router               from 'react-router/lib/Router';
+import Route                from 'react-router/lib/Route';
+import Redirect             from 'react-router/lib/Redirect';
+import Link                 from 'react-router/lib/Link';
+import Nav                  from 'react-bootstrap/lib/Nav';
+import NavItem              from 'react-bootstrap/lib/NavItem';
+import Navbar               from 'react-bootstrap/lib/Navbar';
+import Input                from 'react-bootstrap/lib/Input';
+import Button               from 'react-bootstrap/lib/Button';
+import createBrowserHistory from 'history/lib/createBrowserHistory';
+import SetWeatherView       from 'pages/setWeatherView';
+import DetailWeatherView    from 'pages/detailWeatherView';
+import NotFound             from 'pages/notFound';
+import {appendBody}         from 'util';
 
 const history = createBrowserHistory();
 
 class NavigationView extends React.Component {
 
-    constructor(props, context){
+    constructor(props){
         super(props);
         this.state = {
-            key: 0
+            pathname: props.location ? props.location.pathname : null,
+            querySearch: props.querySearch
         };
     }
     
@@ -38,16 +38,17 @@ class NavigationView extends React.Component {
         window.location = '?q=' + $('input.form-control')[0].value;
     }
     
-    handleClick(key) {
-        this.setState({key: key});
+    handleClick(pathname) {
+        this.setState({pathname: pathname});
     }
     
-    className(key) {
-        console.log(this.props.querySearch);
-        return this.state.key == key ? 'active' : '';
+    className(pathname) {
+        return this.state.pathname == pathname ? 'active' : '';
     }
-    
     render() {
+        
+        let params = '?q=' + this.state.querySearch;
+        
         return (
             <Navbar inverse fixedTop>
                 <Navbar.Header>
@@ -56,8 +57,8 @@ class NavigationView extends React.Component {
                 </Navbar.Header>
                 <Navbar.Collapse>
                     <Nav>
-                        <li onClick={this.handleClick.bind(this, 0)} className={this.className(0)}><Link to="main">Главная</Link></li>
-                        <li onClick={this.handleClick.bind(this, 1)} className={this.className(1)}><Link to="detail">Подробно</Link></li>
+                        <li onClick={this.handleClick.bind(this, "/main")} className={this.className("/main")}><Link to={"/main" + params}>Главная</Link></li>
+                        <li onClick={this.handleClick.bind(this, "/detail")} className={this.className("/detail")}><Link to={"/detail" + params}>Подробно</Link></li>
                     </Nav>
                     <Nav pullRight>
                         <Navbar.Form>
@@ -71,8 +72,6 @@ class NavigationView extends React.Component {
     }
 }
 
-//ReactMixin(NavigationView.prototype, RouteContext);
-
 class App extends React.Component {
     
     render() {
@@ -81,9 +80,8 @@ class App extends React.Component {
         
         return (
             <div>
-                <NavigationView querySearch={querySearch} />
-                
                 <div className="container">
+                    <NavigationView location={location} querySearch={querySearch} />
                     {this.props.children}
                 </div>
             </div>
@@ -92,21 +90,15 @@ class App extends React.Component {
     }
 }
 
-class NoMatch extends React.Component {
-    render() {
-        return (<div style={{fontSize: '50px'}}>404 Not found</div>);
-    }
-}
-
 ReactDOM.render((
     <Router history={history}>
         <Route component={App}>
-            <Route path="main" component={WeatherView}/>
+            <Route path="main" component={SetWeatherView}/>
             <Route path="detail" component={DetailWeatherView}/>
             
             <Redirect from="/" to="main" />
             
-            <Route path="/*" component={NoMatch} />
+            <Route path="/*" component={NotFound} />
         </Route>
     </Router>
 ), appendBody());

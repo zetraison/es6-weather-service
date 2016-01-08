@@ -1,114 +1,82 @@
-import React                from 'react/lib/React';
-import Highcharts           from 'highcharts';
+import React                                        from 'react/lib/React';
+import Highcharts                                   from 'highcharts';
+import {timestampToTime, timestampToDate, roundTo}  from 'util';
 require('highcharts/highcharts-more')(Highcharts);
-import {WEATHER_TYPES}      from 'components/weather/service';
-import WeatherService       from 'components/weather/service';
-import config               from 'config';
-import {timestampToTime, 
-        timestampToDate, 
-        getCurrentPosition} from 'util/util';
 
-let weatherService = new WeatherService();
-
-class tempVariationColumnChart extends React.Component {
+class TempVariationColumnChart extends React.Component {
     
     constructor(props){
         super(props);
         this.state = {
-            cityName: props.querySearch,
-            list: []
+            id: props.id,
+            city: props.city,
+            data: props.data
         };
-    }
-    
-    refreshData(callback){
-        
-        let limit = 8;
-        
-        if (this.state.cityName) {
-            weatherService.byCityName(this.state.cityName, WEATHER_TYPES['FORECAST'], limit, response => {
-                this.setState({
-                    list: response.list,
-                    cityName: response.city.name
-                });
-                callback();
-            });
-        } else {
-            getCurrentPosition().then((coords) => {
-                weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['FORECAST'], limit, response => {
-                    this.setState({
-                        list: response.list,
-                        cityName: response.city.name
-                    });
-                    callback();
-                });
-            });
-        }
     }
     
     renderChart(){
         
-        let ranges = this.state.list.map(el => [el.main.temp_min, el.main.temp_max]);
-        let categories = this.state.list.map(el => timestampToTime(el.dt) + '<br>' + timestampToDate(el.dt));
+        let chartType = 'columnrange';
+        let title = 'Вариация температуры почасовая, ' + this.state.city;
+        let subtitle = 'Источник: Openweathermap.org';
+        let unitSuffix = '°C';
+        let yAxisTitle = 'Температура (' + unitSuffix + ')';
+        let seriesName = 'Температура';
         
-        Highcharts.chart(this.props.id, {
+        let data = this.state.data.map(el => [roundTo(el.main.temp_min, 1), roundTo(el.main.temp_max, 1)]);
+        let categories = this.state.data.map(el => timestampToTime(el.dt) + '<br>' + timestampToDate(el.dt));
+        
+        Highcharts.chart(this.state.id, {
             chart: {
-                type: 'columnrange',
+                type: chartType,
                 inverted: true
             },
-    
             title: {
-                text: 'Вариация температуры почасовая, ' + this.state.cityName
+                text: title
             },
-    
             subtitle: {
-                text: 'Источник: Openweathermap.org'
+                text: subtitle
             },
-    
             xAxis: {
                 categories: categories,
             },
-    
             yAxis: {
                 title: {
-                    text: 'Температура ( °C )'
+                    text: yAxisTitle
                 }
             },
-    
             tooltip: {
-                valueSuffix: '°C'
+                valueSuffix: unitSuffix
             },
-    
             plotOptions: {
                 columnrange: {
                     dataLabels: {
                         enabled: true,
                         formatter: function () {
-                            return this.y + '°C';
+                            return this.y + unitSuffix;
                         }
                     }
                 }
             },
-    
             legend: {
-                enabled: false
+                enabled: true
             },
-    
             series: [{
-                name: 'Температура',
-                data: ranges
+                name: seriesName,
+                data: data
             }]
         });
     }
     
     componentDidMount(){
-        this.refreshData(this.renderChart.bind(this));
+        this.renderChart();
     }
     
     render(){
         return (
-            <div id={this.props.id}></div>
+            <div id={this.state.id}></div>
         );
     }
 }
 
-export default tempVariationColumnChart;
+export default TempVariationColumnChart;

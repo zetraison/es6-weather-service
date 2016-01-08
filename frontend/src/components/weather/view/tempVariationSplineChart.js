@@ -1,83 +1,55 @@
-import React                from 'react/lib/React';
-import Highcharts           from 'highcharts';
-require('highcharts/highcharts-more')(Highcharts);
-import {WEATHER_TYPES}      from 'components/weather/service';
-import WeatherService       from 'components/weather/service';
-import config               from 'config';
-import {timestampToTime, 
-        timestampToDate, 
-        getCurrentPosition} from 'util/util';
+import React                                        from 'react/lib/React';
+import Highcharts                                   from 'highcharts';
+import {timestampToTime, timestampToDate, roundTo}  from 'util';
 
-let weatherService = new WeatherService();
-
-class tempVariationSplineChart extends React.Component {
+class TempVariationSplineChart extends React.Component {
     
     constructor(props){
         super(props);
         this.state = {
-            cityName: props.querySearch,
-            list: []
+            id: props.id,
+            city: props.city,
+            data: props.data
         };
-    }
-    
-    refreshData(callback){
-        
-        let limit = 8;
-        
-        if (this.state.cityName) {
-            weatherService.byCityName(this.state.cityName, WEATHER_TYPES['FORECAST'], limit, response => {
-                this.setState({
-                    list: response.list,
-                    cityName: response.city.name
-                });
-                callback();
-            });
-        } else {
-            getCurrentPosition().then((coords) => {
-                weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['FORECAST'], limit, response => {
-                    this.setState({
-                        list: response.list,
-                        cityName: response.city.name
-                    });
-                    callback();
-                });
-            });
-        }
     }
     
     renderChart(){
         
-        let ranges = this.state.list.map(el => [el.main.temp_min, el.main.temp_max]);
-        let average = this.state.list.map(el => parseFloat(((el.main.temp_min + el.main.temp_max) / 2).toFixed(2)));
+        let chartType = 'arearange';
+        let title = 'Вариация температуры почасовая, ' + this.state.city;
+        let subtitle = 'Источник: Openweathermap.org';
+        let unitSuffix = '°C';
+        let yAxisTitle = 'Температура (' + unitSuffix + ')';
+        let seriesName1 = 'Средняя температура';
+        let seriesName2 = 'Интервал температуры';
         
-        Highcharts.chart(this.props.id, {
+        let data = this.state.data.map(el => [roundTo(el.main.temp_min, 1), roundTo(el.main.temp_max, 1)]);
+        let average = this.state.data.map(el => (roundTo(el.main.temp_min, 1) + roundTo(el.main.temp_max, 1)) / 2);
+        let categories = this.state.data.map(el => timestampToTime(el.dt) + '<br>' + timestampToDate(el.dt));
+        
+        Highcharts.chart(this.state.id, {
             title: {
-                text: 'Вариация температуры почасовая, ' + this.state.cityName
+                text: title
             },
-            
             subtitle: {
-                text: 'Источник: Openweathermap.org'
+                text: subtitle
             },
-            
             xAxis: [{
-                categories: this.state.list.map(el => timestampToTime(el.dt) + '<br>' + timestampToDate(el.dt)),
+                categories: categories,
                 crosshair: true
             }],
-    
             yAxis: {
                 title: {
                     text: null
                 }
             },
-    
             tooltip: {
                 crosshairs: true,
                 shared: true,
-                valueSuffix: '°C'
+                valueSuffix: unitSuffix
             },
-    
             series: [{
-                name: 'Средняя температура',
+                name: seriesName1,
                 data: average,
                 zIndex: 1,
                 marker: {
@@ -86,9 +58,9 @@ class tempVariationSplineChart extends React.Component {
                     lineColor: Highcharts.getOptions().colors[0]
                 }
             }, {
-                name: 'Интервал',
-                data: ranges,
-                type: 'arearange',
+                name: seriesName2,
+                data: data,
+                type: chartType,
                 lineWidth: 0,
                 linkedTo: ':previous',
                 color: Highcharts.getOptions().colors[0],
@@ -99,14 +71,14 @@ class tempVariationSplineChart extends React.Component {
     }
     
     componentDidMount(){
-        this.refreshData(this.renderChart.bind(this));
+        this.renderChart();
     }
     
     render(){
         return (
-            <div id={this.props.id}></div>
+            <div id={this.state.id}></div>
         );
     }
 }
 
-export default tempVariationSplineChart;
+export default TempVariationSplineChart;

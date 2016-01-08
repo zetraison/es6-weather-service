@@ -49,6 +49,10 @@ export function convertingHpaTommHg(pressure){
     return Math.round(config.hpaTommHgCoeff * pressure);
 }
 
+export function roundTo(value, part){
+    return parseFloat(value.toFixed(part));
+}
+
 export function appendBody(){
 
     var el = document.createElement('div');

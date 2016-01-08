@@ -1,64 +1,39 @@
-import React                from 'react/lib/React';
-import Highcharts           from 'highcharts';
-require('highcharts/highcharts-more')(Highcharts);
-import {WEATHER_TYPES}      from 'components/weather/service';
-import WeatherService       from 'components/weather/service';
-import config               from 'config';
-import {timestampToTime, 
-        timestampToDate, 
-        getCurrentPosition} from 'util/util';
-
-let weatherService = new WeatherService();
+import React                                from 'react/lib/React';
+import Highcharts                           from 'highcharts';
+import {timestampToTime, timestampToDate}   from 'util';
 
 class WindSpeedChart extends React.Component {
     
     constructor(props){
         super(props);
         this.state = {
-            cityName: props.querySearch,
-            list: []
+            id: props.id,
+            city: props.city,
+            data: props.data
         };
-    }
-    
-    refreshData(callback){
-        
-        let limit = 8;
-        
-        if (this.state.cityName) {
-            weatherService.byCityName(this.state.cityName, WEATHER_TYPES['FORECAST'], limit, response => {
-                this.setState({
-                    list: response.list,
-                    cityName: response.city.name
-                });
-                callback();
-            });
-        } else {
-            getCurrentPosition().then((coords) => {
-                weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['FORECAST'], limit, response => {
-                    this.setState({
-                        list: response.list,
-                        cityName: response.city.name
-                    });
-                    callback();
-                });
-            });
-        }
     }
     
     renderChart(){
         
-        let data = this.state.list.map(el => el.wind.speed);
-        let categories = this.state.list.map(el => timestampToTime(el.dt) + '<br>' + timestampToDate(el.dt));
+        let chartType = 'spline';
+        let title = 'Скорость ветра почасовая, ' + this.state.city;
+        let subtitle = 'Источник: Openweathermap.org';
+        let unitSuffix = 'м/с';
+        let yAxisTitle = 'Скорость ветра (' + unitSuffix + ')';
+        let seriesName = 'Скорость ветра';
         
-        Highcharts.chart(this.props.id, {
+        let data = this.state.data.map(el => el.wind.speed);
+        let categories = this.state.data.map(el => timestampToTime(el.dt) + '<br>' + timestampToDate(el.dt));
+        
+        Highcharts.chart(this.state.id, {
             chart: {
-                type: 'spline'
+                type: chartType
             },
             title: {
-                text: 'Скорость ветра почасовая, ' + this.state.cityName
+                text: title
             },
             subtitle: {
-                text: 'Источник: Openweathermap.org'
+                text: subtitle
             },
             xAxis: [{
                 categories: categories,
@@ -66,7 +41,7 @@ class WindSpeedChart extends React.Component {
             }],
             yAxis: {
                 title: {
-                    text: 'Скорость ветра (м/с)'
+                    text: yAxisTitle
                 },
                 minorGridLineWidth: 0,
                 gridLineWidth: 0,
@@ -144,7 +119,7 @@ class WindSpeedChart extends React.Component {
                 }]
             },
             tooltip: {
-                valueSuffix: ' м/с'
+                valueSuffix: ' ' + unitSuffix
             },
             plotOptions: {
                 spline: {
@@ -160,25 +135,20 @@ class WindSpeedChart extends React.Component {
                 }
             },
             series: [{
-                name: 'Скорость ветра',
+                name: seriesName,
                 data: data
     
-            }],
-            navigation: {
-                menuItemStyle: {
-                    fontSize: '10px'
-                }
-            }
+            }]
         });
     }
     
     componentDidMount(){
-        this.refreshData(this.renderChart.bind(this));
+        this.renderChart();
     }
     
     render(){
         return (
-            <div id={this.props.id}></div>
+            <div id={this.state.id}></div>
         );
     }
 }
