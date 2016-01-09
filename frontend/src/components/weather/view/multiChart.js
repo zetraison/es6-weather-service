@@ -233,9 +233,9 @@ class MultiChart extends React.Component {
                     to: current2,
                     color: 'rgba(0, 0, 255, .8)',
                     label: {
-                        text: 'Сейчас <br>' + timestampToTime(new Date().getTime() / 1000),
+                        text: '<br>Сейчас <br>' + timestampToTime(new Date().getTime() / 1000),
                         style: {
-                            color: '#606060'
+                            color: '#6060ff'
                         }
                     }
                 }],

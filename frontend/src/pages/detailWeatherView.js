@@ -5,6 +5,8 @@ import TempVariationColumnChart from 'components/weather/view/tempVariationColum
 import TempVariationSplineChart from 'components/weather/view/tempVariationSplineChart';
 import WindSpeedChart           from 'components/weather/view/windSpeedChart';
 import PrecipitationChart       from 'components/weather/view/precipitationChart';
+import PressureChart            from 'components/weather/view/pressureChart';
+import HumidityChart            from 'components/weather/view/humidityChart';
 import Throbber                 from 'components/common/throbber';
 import {getCurrentPosition}     from 'util';
 
@@ -18,29 +20,42 @@ class DetailWeatherView extends React.Component {
         
         this.state = {
             city: location.query && location.query.q ? location.query.q : null,
-            data: []
+            dataHourly: [],
+            dataDaily: []
         };
     }
     
     refreshData(){
         
         let city = this.state.city;
-        let type = WEATHER_TYPES['FORECAST_HOURLY'];
-        let limit = 8;
+        let limitDaily = 5;
+        let limitHourly = 40;
         
         if (city) {
-            weatherService.byCityName(city, type, limit, response => {
+            weatherService.byCityName(city, WEATHER_TYPES['FORECAST_HOURLY'], limitHourly, response => {
                 this.setState({
-                    data: response.list,
+                    dataHourly: response.list,
                     city: response.city.name
+                });
+                
+                weatherService.byCityName(city, WEATHER_TYPES['FORECAST_DAILY'], limitDaily, response => {
+                    this.setState({
+                        dataDaily: response.list
+                    });
                 });
             });
         } else {
             getCurrentPosition().then((coords) => {
-                weatherService.byGeoCoord(coords[0], coords[1], type, limit, response => {
+                weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['FORECAST_HOURLY'], limitHourly, response => {
                     this.setState({
-                        data: response.list,
+                        dataHourly: response.list,
                         city: response.city.name
+                    });
+                    
+                    weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['FORECAST_DAILY'], limitDaily, response => {
+                        this.setState({
+                            dataDaily: response.list
+                        });
                     });
                 });
             });
@@ -53,33 +68,43 @@ class DetailWeatherView extends React.Component {
     
     render(){
             
-        let data = this.state.data;
         let city = this.state.city;
+        let dataHourly = this.state.dataHourly;
+        let dataDaily = this.state.dataDaily;
         
-        if (data.length) {
+        if (dataHourly.length && dataDaily.length) {
             return (
                 <div>
                     <div className="row">
                         <div className="col-lg-12">
-                            <h2>Подробный прогноз</h2>
+                            <h1>Детальный прогноз</h1>
                         </div>
                     </div>
                     
                     <div className="row">
                         <div className="col-md-6">
-                            <TempVariationSplineChart city={city} data={data} id="tempVariationSplineChart" />
+                            <TempVariationSplineChart city={city} dataHourly={dataHourly} dataDaily={dataDaily} id="tempVariationSplineChart" />
                         </div>
                         <div className="col-md-6">
-                            <TempVariationColumnChart city={city} data={data} id="tempVariationColumnChart" />
+                            <TempVariationColumnChart city={city} dataHourly={dataHourly} dataDaily={dataDaily} id="tempVariationColumnChart" />
                         </div>
                     </div>
                     
                     <div className="row">
                         <div className="col-md-6">
-                            <WindSpeedChart city={city} data={data} id="windSpeedChart" />
+                            <WindSpeedChart city={city} dataHourly={dataHourly} dataDaily={dataDaily} id="windSpeedChart" />
                         </div>
                         <div className="col-md-6">
-                            <PrecipitationChart city={city} data={data} id="precipitationChart" />
+                            <PrecipitationChart city={city} dataHourly={dataHourly} dataDaily={dataDaily} id="precipitationChart" />
+                        </div>
+                    </div>
+                    
+                    <div className="row">
+                        <div className="col-md-6">
+                            <PressureChart city={city} dataHourly={dataHourly} dataDaily={dataDaily} id="pressureChart" />
+                        </div>
+                        <div className="col-md-6">
+                            <HumidityChart city={city} dataHourly={dataHourly} dataDaily={dataDaily} id="humidityChart" />
                         </div>
                     </div>
                 </div>

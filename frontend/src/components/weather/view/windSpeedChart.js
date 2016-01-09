@@ -1,5 +1,6 @@
 import React                                from 'react/lib/React';
 import Highcharts                           from 'highcharts';
+require('highcharts/modules/drilldown')(Highcharts);
 import {timestampToTime, timestampToDate}   from 'util';
 
 class WindSpeedChart extends React.Component {
@@ -9,21 +10,36 @@ class WindSpeedChart extends React.Component {
         this.state = {
             id: props.id,
             city: props.city,
-            data: props.data
+            dataHourly: props.dataHourly,
+            dataDaily: props.dataDaily
         };
     }
     
     renderChart(){
         
         let chartType = 'spline';
-        let title = 'Скорость ветра почасовая, ' + this.state.city;
+        let title = 'Скорость ветра, 5 дней, ' + this.state.city;
         let subtitle = 'Источник: Openweathermap.org';
         let unitSuffix = 'м/с';
         let yAxisTitle = 'Скорость ветра (' + unitSuffix + ')';
         let seriesName = 'Скорость ветра';
         
-        let data = this.state.data.map(el => el.wind.speed);
-        let categories = this.state.data.map(el => timestampToTime(el.dt) + '<br>' + timestampToDate(el.dt));
+        let data = this.state.dataDaily.map(el => {
+            return {
+                name: timestampToDate(el.dt),
+                y: el.speed,
+                drilldown: el.speed.toString()
+            };
+        });
+        let drilldownSeries = this.state.dataDaily.map(el => {
+            let dataHourly = this.state.dataHourly.filter(e => new Date(e.dt * 1000).getDate() <= new Date(el.dt * 1000).getDate()).slice(-8);
+            
+            return {
+                id: el.speed.toString(),
+                name: seriesName + ', ' + timestampToDate(el.dt),
+                data: dataHourly.map(el => [timestampToDate(el.dt) + '<br>' + timestampToTime(el.dt), el.wind.speed])
+            };
+        });
         
         Highcharts.chart(this.state.id, {
             chart: {
@@ -35,10 +51,9 @@ class WindSpeedChart extends React.Component {
             subtitle: {
                 text: subtitle
             },
-            xAxis: [{
-                categories: categories,
-                crosshair: true
-            }],
+            xAxis: {
+                type: 'category'
+            },
             yAxis: {
                 title: {
                     text: yAxisTitle
@@ -138,7 +153,10 @@ class WindSpeedChart extends React.Component {
                 name: seriesName,
                 data: data
     
-            }]
+            }],
+            drilldown: {
+                series: drilldownSeries
+            }
         });
     }
     

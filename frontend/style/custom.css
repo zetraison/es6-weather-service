@@ -4,10 +4,6 @@ body {
     overflow-x: hidden;
 }
 
-.container {
-    width: 1000px;
-}
-
 .jumbotron {
     background: url(../images/background_sky.jpg) no-repeat;
     background-size: cover;
@@ -20,6 +16,11 @@ body {
 }
 
 /* Multychart tabs */
+
+.navbar-inverse {
+    box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+    background-color: #39CCCC;
+}
 
 .nav-tabs > li, .nav-pills > li {
     float:none;
@@ -71,7 +72,7 @@ body {
     position: absolute;
     top: 50%;
     left: 50%;
-    margin: -20px 0 0 -20px;
+    margin: -40px 0 0 -40px;
     background: url(../images/throbber.gif) no-repeat;
     background-size: cover;
 }

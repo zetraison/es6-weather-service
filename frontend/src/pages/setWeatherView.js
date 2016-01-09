@@ -26,7 +26,7 @@ class WeatherView extends React.Component {
         
         let city = this.state.city;
         let limitCurrent = 1;
-        let limitHourly = 8;
+        let limitHourly = 40;
         let limitDaily = 6;
         
         if (city) {

@@ -58,7 +58,7 @@ class NavigationView extends React.Component {
                 <Navbar.Collapse>
                     <Nav>
                         <li onClick={this.handleClick.bind(this, "/main")} className={this.className("/main")}><Link to={"/main" + params}>Главная</Link></li>
-                        <li onClick={this.handleClick.bind(this, "/detail")} className={this.className("/detail")}><Link to={"/detail" + params}>Подробно</Link></li>
+                        <li onClick={this.handleClick.bind(this, "/detail")} className={this.className("/detail")}><Link to={"/detail" + params}>Детальный прогноз</Link></li>
                     </Nav>
                     <Nav pullRight>
                         <Navbar.Form>
@@ -80,8 +80,9 @@ class App extends React.Component {
         
         return (
             <div>
+                <NavigationView location={location} querySearch={querySearch} />
+                
                 <div className="container">
-                    <NavigationView location={location} querySearch={querySearch} />
                     {this.props.children}
                 </div>
             </div>

@@ -17,18 +17,18 @@ class PrecipitationChart extends React.Component {
     
     renderChart(){
         
-        let chartType = 'areaspline';
-        let title = 'Осадки, 5 дней, ' + this.state.city;
+        let chartType = 'spline';
+        let title = 'Влажность, 5 дней, ' + this.state.city;
         let subtitle = 'Источник: Openweathermap.org';
-        let unitSuffix = 'мм';
-        let yAxisTitle = 'Осадки (' + unitSuffix + ')';
-        let seriesName = 'Осадки';
+        let unitSuffix = '%';
+        let yAxisTitle = 'Влажность (' + unitSuffix + ')';
+        let seriesName = 'Влажность';
         
         let data = this.state.dataDaily.map(el => {
             return {
                 name: timestampToDate(el.dt),
-                y: el.snow ? el.snow : el.rain ? el.rain : null,
-                drilldown: (el.snow ? el.snow : el.rain ? el.rain : '').toString()
+                y: el.humidity,
+                drilldown: el.humidity.toString()
             };
         });
         let drilldownSeries = this.state.dataDaily.map(el => {
@@ -36,9 +36,9 @@ class PrecipitationChart extends React.Component {
             let dataHourly = this.state.dataHourly.filter(e => new Date(e.dt * 1000).getDate() <= new Date(el.dt * 1000).getDate()).slice(-8);
             
             return {
-                id: (el.snow ? el.snow : el.rain ? el.rain : '').toString(),
+                id: el.humidity.toString(),
                 name: seriesName + ', ' + timestampToDate(el.dt),
-                data: dataHourly.map(el => [timestampToDate(el.dt) + '<br>' + timestampToTime(el.dt), el.snow ? el.snow['3h'] : el.rain ? el.rain['3h'] : null])
+                data: dataHourly.map(el => [timestampToDate(el.dt) + '<br>' + timestampToTime(el.dt), el.main.humidity])
             };
         });
         

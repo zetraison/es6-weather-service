@@ -30,23 +30,21 @@ class CurrentWeatherChart extends React.Component {
         
         return (
             <div className="jumbotron">
-                <div className="container">
-                    <div className="row">
-                        <div className="col-md-7 portfolio-item">
-                            <h2>Погода, {this.state.city}</h2>
-                            <h1>{temp}°C <img className="weather-icon" src={iconSrc} /></h1>
-                            <h3>{temp_min}°C / {temp_max}°C</h3>
-                        </div>
-                        
-                        <div className="col-md-5">
-                            <h4>Влажность: {humidity}%</h4>
-                            <h4>Ветер: {windSpeed} м/с</h4>
-                            <h4>Давление: {pressure} мм рт.ст.</h4>
-                            {visibility}
-                            <hr />
-                            <h4>Восход солнца: {sunrise}</h4>
-                            <h4>Закат солнца: {sunset}</h4>
-                        </div>
+                <div className="row">
+                    <div className="col-md-7 portfolio-item">
+                        <h2>Погода, {this.state.city}</h2>
+                        <h1>{temp}°C <img className="weather-icon" src={iconSrc} /></h1>
+                        <h3>{temp_min}°C / {temp_max}°C</h3>
+                    </div>
+                    
+                    <div className="col-md-5">
+                        <h4>Влажность: {humidity}%</h4>
+                        <h4>Ветер: {windSpeed} м/с</h4>
+                        <h4>Давление: {pressure} мм рт.ст.</h4>
+                        {visibility}
+                        <hr />
+                        <h4>Восход солнца: {sunrise}</h4>
+                        <h4>Закат солнца: {sunset}</h4>
                     </div>
                 </div>
             </div>
