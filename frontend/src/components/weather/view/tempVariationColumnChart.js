@@ -18,7 +18,7 @@ class TempVariationColumnChart extends React.Component {
     renderChart(){
         
         let title = 'Вариация температуры, 5 дней, ' + this.state.city;
-        let subtitle = 'Источник: Openweathermap.org';
+        let subtitle = 'Источник: OpenWeatherMap.org';
         let unitSuffix = '°C';
         let yAxisTitle = 'Температура (' + unitSuffix + ')';
         let seriesName1 = 'Средняя температура';
@@ -74,7 +74,7 @@ class TempVariationColumnChart extends React.Component {
                 valueSuffix: unitSuffix
             },
             plotOptions: {
-                columnrange: {
+                columnRange: {
                     dataLabels: {
                         enabled: true,
                         formatter: function () {
@@ -96,7 +96,7 @@ class TempVariationColumnChart extends React.Component {
             }, {
                 name: seriesName2,
                 data: data,
-                type: 'columnrange',
+                type: 'columnRange',
                 color: Highcharts.getOptions().colors[0],
                 zIndex: 0
             }],

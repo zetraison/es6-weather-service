@@ -36,7 +36,7 @@ export function getCurrentPosition(){
     return new Promise((resolve, reject) => {
         
         navigator.geolocation.getCurrentPosition(res => {
-            resolve([res.coords.latitude, res.coords.longitude]);
+            resolve([res.Coordinates.latitude, res.Coordinates.longitude]);
         });
     });
 }
@@ -45,8 +45,8 @@ export function buildIconUrl(code){
     return config.openWeatherMap.imgUrl + code + '.png';
 }
 
-export function convertingHpaTommHg(pressure){
-    return Math.round(config.hpaTommHgCoeff * pressure);
+export function convertingHpaTomHg(pressure){
+    return Math.round(config.hpaTomHgCoefficient * pressure);
 }
 
 export function roundTo(value, part){

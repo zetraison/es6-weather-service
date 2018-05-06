@@ -47,7 +47,7 @@ module.exports = {
         ])
     ],
     
-    devtool: NODE_ENV == 'development' ? 'cheap-inline-module-source-map' : null,
+    devTool: NODE_ENV == 'development' ? 'cheap-inline-module-source-map' : null,
     watch: NODE_ENV == 'development',
 };
 

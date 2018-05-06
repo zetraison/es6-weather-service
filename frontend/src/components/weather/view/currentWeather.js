@@ -1,5 +1,5 @@
 import React from 'react/lib/React';
-import {timestampToTime, buildIconUrl, convertingHpaTommHg}  from 'util';
+import {timestampToTime, buildIconUrl, convertingHpaTomHg}  from 'util';
 
 class CurrentWeatherChart extends React.Component {
     
@@ -20,7 +20,7 @@ class CurrentWeatherChart extends React.Component {
         let temp_max = Math.round(data.main.temp_max);
         
         let humidity = data.main.humidity;
-        let pressure = convertingHpaTommHg(data.main.pressure);
+        let pressure = convertingHpaTomHg(data.main.pressure);
         let windSpeed = data.wind.speed ;
         
         let iconSrc = buildIconUrl(data.weather[0].icon);

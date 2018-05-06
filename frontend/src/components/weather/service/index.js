@@ -24,7 +24,7 @@ class WeatherService extends Service {
         super(props);
     
         this.url = config.openWeatherMap.apiUrl;
-        this.appid = config.openWeatherMap.apikey;
+        this.appId = config.openWeatherMap.apiKey;
         
         this.mode = props && props.mode 
             ? props.mode
@@ -43,7 +43,7 @@ class WeatherService extends Service {
                 cnt: limit || 10,
                 mode: this.mode,
                 units: this.units,
-                appid: this.appid
+                appId: this.appId
             },
             success: callback
         });
@@ -57,13 +57,13 @@ class WeatherService extends Service {
                 cnt: limit || 10,
                 mode: this.mode,
                 units: this.units,
-                appid: this.appid
+                appId: this.appId
             },
             success: callback
         });
     }
     
-    byGeoCoord(lat, lon, type, limit, callback) {
+    byGeoCoordinates(lat, lon, type, limit, callback) {
         
         this.request(this.url + type, {
             data: {
@@ -72,7 +72,7 @@ class WeatherService extends Service {
                 cnt: limit || 10,
                 mode: this.mode,
                 units: this.units,
-                appid: this.appid
+                appId: this.appId
             },
             success: callback
         });

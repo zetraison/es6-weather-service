@@ -19,7 +19,7 @@ class PrecipitationChart extends React.Component {
         
         let chartType = 'spline';
         let title = 'Влажность, 5 дней, ' + this.state.city;
-        let subtitle = 'Источник: Openweathermap.org';
+        let subtitle = 'Источник: OpenWeatherMap.org';
         let unitSuffix = '%';
         let yAxisTitle = 'Влажность (' + unitSuffix + ')';
         let seriesName = 'Влажность';
@@ -68,7 +68,7 @@ class PrecipitationChart extends React.Component {
                 enabled: true
             },
             plotOptions: {
-                areaspline: {
+                areaSpline: {
                     fillOpacity: 0.5
                 }
             },
