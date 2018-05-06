@@ -3,7 +3,7 @@ import Highcharts               from 'highcharts';
 require('highcharts/modules/drilldown')(Highcharts);
 import {timestampToTime, 
         timestampToDate, 
-        convertingHpaTommHg}   from 'util';
+        convertingHpaTomHg}   from 'util';
 
 class PrecipitationChart extends React.Component {
     
@@ -21,7 +21,7 @@ class PrecipitationChart extends React.Component {
         
         let chartType = 'spline';
         let title = 'Давление, 5 дней, ' + this.state.city;
-        let subtitle = 'Источник: Openweathermap.org';
+        let subtitle = 'Источник: OpenWeatherMap.org';
         let unitSuffix = 'мм рт.ст.';
         let yAxisTitle = 'Давление (' + unitSuffix + ')';
         let seriesName = 'Давление';
@@ -29,18 +29,18 @@ class PrecipitationChart extends React.Component {
         let data = this.state.dataDaily.map(el => {
             return {
                 name: timestampToDate(el.dt),
-                y: convertingHpaTommHg(el.pressure),
-                drilldown: el.pressure.toString()
+                y: convertingHpaTomHg(el.pressure),
+                drillDown: el.pressure.toString()
             };
         });
-        let drilldownSeries = this.state.dataDaily.map(el => {
+        let drillDownSeries = this.state.dataDaily.map(el => {
             
             let dataHourly = this.state.dataHourly.filter(e => new Date(e.dt * 1000).getDate() <= new Date(el.dt * 1000).getDate()).slice(-8);
             
             return {
                 id: el.pressure.toString(),
                 name: seriesName + ', ' + timestampToDate(el.dt),
-                data: dataHourly.map(el => [timestampToDate(el.dt) + '<br>' + timestampToTime(el.dt), convertingHpaTommHg(el.main.pressure)])
+                data: dataHourly.map(el => [timestampToDate(el.dt) + '<br>' + timestampToTime(el.dt), convertingHpaTomHg(el.main.pressure)])
             };
         });
         
@@ -70,7 +70,7 @@ class PrecipitationChart extends React.Component {
                 enabled: true
             },
             plotOptions: {
-                areaspline: {
+                areaSpline: {
                     fillOpacity: 0.5
                 }
             },
@@ -78,8 +78,8 @@ class PrecipitationChart extends React.Component {
                 name: seriesName,
                 data: data
             }],
-            drilldown: {
-                series: drilldownSeries
+            drillDown: {
+                series: drillDownSeries
             }
         });
     }

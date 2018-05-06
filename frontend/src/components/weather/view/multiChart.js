@@ -6,7 +6,7 @@ import config               from 'config';
 import {timestampToTime, 
         timestampToDate, 
         buildIconUrl, 
-        convertingHpaTommHg} from 'util';
+        convertingHpaTomHg} from 'util';
 
 let FORECAST_DAYS_LIMIT = 5;
 let TIME_INTERVAL_LIMIT = 8;
@@ -69,7 +69,7 @@ class DayNavs extends React.Component {
             let src = buildIconUrl(el.weather[0].icon);
             let day = timestampToDate(el.dt);
             let temp = (<p>{Math.round(el.temp.day)}° <span className="min-temp">{Math.round(el.temp.night)}°</span></p>);
-            let pressure = convertingHpaTommHg(el.pressure);
+            let pressure = convertingHpaTomHg(el.pressure);
             
             return (
                 <NavItem eventKey={index} key={index}>
@@ -103,7 +103,7 @@ class MultiChart extends React.Component {
         };
     }
     
-    calcSunCoord(dt) {
+    calcSunCoordinates(dt) {
         let d = new Date(dt * 1000);
         return (d.getHours() + d.getMinutes() / 60) * 8 / 24 - 0.5;
     }
@@ -151,7 +151,7 @@ class MultiChart extends React.Component {
                 label: 'Давление (мм рт.ст.)', 
                 valueSuffix: " мм рт.ст.", 
                 type: "spline", 
-                data: list.map(el => convertingHpaTommHg(el.main.pressure))
+                data: list.map(el => convertingHpaTomHg(el.main.pressure))
             },
             'wind': {
                 label: 'Ветер (м/с)', 
@@ -162,13 +162,13 @@ class MultiChart extends React.Component {
             'precipitation': {
                 label: 'Осадки (мм)', 
                 valueSuffix: " мм", 
-                type: "areaspline", 
+                type: "areaSpline",
                 data: list.map(el => el.snow['3h'] * 1000)
             }
         };
         
         let title = 'Почасовой прогноз погоды на ' + (dt ? timestampToDate(dt) : timestampToDate(new Date().getTime() / 1000)) + ', ' + this.state.city;
-        let subtitle = 'Источник: Openweathermap.org';
+        let subtitle = 'Источник: OpenWeatherMap.org';
         
         let categories = list.map(el => timestampToTime(el.dt) + '<br>' + timestampToDate(el.dt));
         let data = units[unit].data;
@@ -179,12 +179,12 @@ class MultiChart extends React.Component {
         let startDay = c == t ? -0.5 : 0;
         let endDay = c == t ? 7.5 : 0;
         
-        let sunrise = c == t ? this.calcSunCoord(dataCurrent.sys.sunrise) : startDay;
-        let sunset = c == t ? this.calcSunCoord(dataCurrent.sys.sunset) : endDay;
+        let sunrise = c == t ? this.calcSunCoordinates(dataCurrent.sys.sunrise) : startDay;
+        let sunset = c == t ? this.calcSunCoordinates(dataCurrent.sys.sunset) : endDay;
         
         let nowDt = new Date().getTime() / 1000;
-        let current1 = c == t ? this.calcSunCoord(nowDt) : 0;
-        let current2 = c == t ? this.calcSunCoord(nowDt) + 0.01 : 0;
+        let current1 = c == t ? this.calcSunCoordinates(nowDt) : 0;
+        let current2 = c == t ? this.calcSunCoordinates(nowDt) + 0.01 : 0;
         
         Highcharts.chart(this.props.id, {
             chart: {
@@ -239,7 +239,7 @@ class MultiChart extends React.Component {
                         }
                     }
                 }],
-                crosshair: true
+                crossHair: true
             }],
             yAxis: [{
                 labels: {

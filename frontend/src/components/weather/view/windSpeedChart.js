@@ -19,7 +19,7 @@ class WindSpeedChart extends React.Component {
         
         let chartType = 'spline';
         let title = 'Скорость ветра, 5 дней, ' + this.state.city;
-        let subtitle = 'Источник: Openweathermap.org';
+        let subtitle = 'Источник: OpenWeatherMap.org';
         let unitSuffix = 'м/с';
         let yAxisTitle = 'Скорость ветра (' + unitSuffix + ')';
         let seriesName = 'Скорость ветра';

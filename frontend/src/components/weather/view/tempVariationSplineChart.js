@@ -17,7 +17,7 @@ class TempVariationSplineChart extends React.Component {
     renderChart(){
         
         let title = 'Вариация температуры, 5 дней, ' + this.state.city;
-        let subtitle = 'Источник: Openweathermap.org';
+        let subtitle = 'Источник: OpenWeatherMap.org';
         let unitSuffix = '°C';
         let yAxisTitle = 'Температура (' + unitSuffix + ')';
         let seriesName1 = 'Средняя температура';
@@ -85,7 +85,7 @@ class TempVariationSplineChart extends React.Component {
             }, {
                 name: seriesName2,
                 data: data,
-                type: 'arearange',
+                type: 'areaRange',
                 lineWidth: 0,
                 linkedTo: ':previous',
                 color: Highcharts.getOptions().colors[0],

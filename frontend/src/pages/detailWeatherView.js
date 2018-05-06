@@ -45,14 +45,14 @@ class DetailWeatherView extends React.Component {
                 });
             });
         } else {
-            getCurrentPosition().then((coords) => {
-                weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['FORECAST_HOURLY'], limitHourly, response => {
+            getCurrentPosition().then((Coordinates) => {
+                weatherService.byGeoCoordinates(Coordinates[0], Coordinates[1], WEATHER_TYPES['FORECAST_HOURLY'], limitHourly, response => {
                     this.setState({
                         dataHourly: response.list,
                         city: response.city.name
                     });
                     
-                    weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['FORECAST_DAILY'], limitDaily, response => {
+                    weatherService.byGeoCoordinates(Coordinates[0], Coordinates[1], WEATHER_TYPES['FORECAST_DAILY'], limitDaily, response => {
                         this.setState({
                             dataDaily: response.list
                         });

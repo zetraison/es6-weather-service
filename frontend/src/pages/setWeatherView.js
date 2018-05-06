@@ -49,19 +49,19 @@ class WeatherView extends React.Component {
                 });
             });
         } else {
-            getCurrentPosition().then((coords) => {
-                weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['CURRENT'], limitCurrent, response => {
+            getCurrentPosition().then((Coordinates) => {
+                weatherService.byGeoCoordinates(Coordinates[0], Coordinates[1], WEATHER_TYPES['CURRENT'], limitCurrent, response => {
                     this.setState({
                         dataCurrent: response,
                         city: response.name
                     });
                     
-                    weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['FORECAST_HOURLY'], limitHourly, response => {
+                    weatherService.byGeoCoordinates(Coordinates[0], Coordinates[1], WEATHER_TYPES['FORECAST_HOURLY'], limitHourly, response => {
                         this.setState({
                             dataHourly: response.list
                         });
                         
-                        weatherService.byGeoCoord(coords[0], coords[1], WEATHER_TYPES['FORECAST_DAILY'], limitDaily, response => {
+                        weatherService.byGeoCoordinates(Coordinates[0], Coordinates[1], WEATHER_TYPES['FORECAST_DAILY'], limitDaily, response => {
                             this.setState({
                                 dataDaily: response.list.filter(el => new Date(el.dt * 1000).getDate() >= new Date().getDate())
                             });

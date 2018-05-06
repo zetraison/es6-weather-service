@@ -17,9 +17,9 @@ class PrecipitationChart extends React.Component {
     
     renderChart(){
         
-        let chartType = 'areaspline';
+        let chartType = 'areaSpline';
         let title = 'Осадки, 5 дней, ' + this.state.city;
-        let subtitle = 'Источник: Openweathermap.org';
+        let subtitle = 'Источник: openWeatherMap.org';
         let unitSuffix = 'мм';
         let yAxisTitle = 'Осадки (' + unitSuffix + ')';
         let seriesName = 'Осадки';
@@ -68,7 +68,7 @@ class PrecipitationChart extends React.Component {
                 enabled: true
             },
             plotOptions: {
-                areaspline: {
+                areaSpline: {
                     fillOpacity: 0.5
                 }
             },
