@@ -10,7 +10,7 @@
     "babel-preset-react": "^6.3.13",
     "bootstrap": "^3.3.6",
     "copy-webpack-plugin": "^0.3.3",
-    "highcharts": "^4.2.1",
+    "highcharts": "^8.1.0",
     "history": "^1.17.0",
     "jquery": "^2.1.4",
     "react": "^0.14.5",
