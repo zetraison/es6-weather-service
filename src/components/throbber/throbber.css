@@ -1,0 +1,19 @@
+.throbberWrapper {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: auto;
+}
+
+.throbberContainer {
+    width: 80px;
+    height: 80px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -40px 0 0 -40px;
+    background: url(throbber.gif) no-repeat;
+    background-size: cover;
+}
